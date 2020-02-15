@@ -6,15 +6,15 @@ import * as vscode from 'vscode';
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+	let tools = new GutTools(context);
+	tools.activate();
 
-	console.log('Congratulations, your extension "gut-extension" is now active!');
+	// console.log('Congratulations, your extension "gut-extension" is now active!');
 
-	let disposable = vscode.commands.registerCommand('extension.gut', () => {
-		let tools = new GutTools(context);
-		tools.activate();
-	});
+	// let disposable = vscode.commands.registerCommand('extension.gut', () => {
+	// });
 
-	context.subscriptions.push(disposable);
+	// context.subscriptions.push(disposable);
 }
 
 // this method is called when your extension is deactivated

@@ -10,15 +10,25 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:extension.gut"
+		"onLanguage:gdscript"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "extension.gut",
-				"title": "GUT"
+				"command": "gut-tool.run_cursor",
+				"title": "GUT(run-at-cursor)"
+			},
+			{
+				"command": "gut-tool.run_all",
+				"title": "GUT(run all)"
+			},
+			{
+				"command": "gut-tool.run_script",
+				"title": "GUT(run script)"
 			}
+
+
 		]
 	},
 	"scripts": {

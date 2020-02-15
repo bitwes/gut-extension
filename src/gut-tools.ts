@@ -11,13 +11,30 @@ export class GutTools{
 		this.context = p_context;
 		this.connection_status = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
     }
-    
+    public activate() {
+        vscode.commands.registerCommand("gut-tool.run_cursor", ()=>{
+            this.runAtCursor();
+        });
+        vscode.commands.registerCommand("gut-tool.run_all", ()=>{
+            this.runAllTests();
+        });    
+        vscode.commands.registerCommand("gut-tool.run_script", ()=>{
+            this.runScript();
+        });    
+    }   
+
+    private runCmd(cmd:string){
+        let terminal = vscode.window.createTerminal('Gut');
+        terminal.show();
+        terminal.sendText(cmd);
+    }
+
     private getTestName(activeEditor:any){
         let name = "";
         var line =  activeEditor.selection.active.line;
         var lineText = activeEditor.document.lineAt(line).text.trim();
         if(lineText.startsWith("func ")){
-            lineText = lineText.replace("func ", '').replace("()", '').trim();
+            lineText = lineText.replace("func ", '').replace("():", '').trim();
             name = lineText;
         }            
         return name;
@@ -34,21 +51,51 @@ export class GutTools{
         return name;
     }
 
-    public activate() {
+    private getFilePath(activeEditor:any){
+        let path = activeEditor.document.uri.toString();
+        path = path.replace(/^.*[\\\/]/, '');
+        return path;
+    }
+
+    private getBaseGutCmd(){
+        return "godot -d  -s res://addons/gut/gut_cmdln.gd ";
+    }
+
+
+    private runAllTests(){
+        let cmd = this.getBaseGutCmd();
+        this.runCmd(cmd);
+    }
+
+    private runScript(){
+        let path = "";
+
+        const activeEditor = vscode.window.activeTextEditor;
+        if (activeEditor) {
+            path = this.getFilePath(activeEditor);
+        }
+        
+        let cmd = this.getBaseGutCmd();
+        if(path !==  ""){
+            cmd+= " -gselect=" + path;
+        }
+        
+        this.runCmd(cmd);
+    }
+
+    private runAtCursor(){
         let path = "";
         let testName = "";
         let innerClass = "";
 
         const activeEditor = vscode.window.activeTextEditor;
         if (activeEditor) {
-            path = activeEditor.document.uri.toString();
-            path = path.replace(/^.*[\\\/]/, '');
+            path = this.getFilePath(activeEditor);
             testName = this.getTestName(activeEditor);
             innerClass = this.getInnerClassName(activeEditor);
-
         }    
         
-        let cmd =  "godot -d  -s res://addons/gut/gut_cmdln.gd ";
+        let cmd = this.getBaseGutCmd();
         if(path !==  ""){
             cmd+= " -gselect=" + path;
         }
@@ -61,9 +108,7 @@ export class GutTools{
             cmd += " -ginner_class=" + innerClass;
         }
 
-        let terminal = vscode.window.createTerminal('Gut');
-        terminal.show();
-        terminal.sendText(cmd);
-    
-    }   
+        this.runCmd(cmd);
+    }
+
 }

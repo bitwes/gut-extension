@@ -11,6 +11,7 @@ export class GutTools{
 		this.context = p_context;
 		this.connection_status = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
     }
+
     public activate() {
         vscode.commands.registerCommand("gut-tool.run_cursor", ()=>{
             this.runAtCursor();
@@ -58,9 +59,9 @@ export class GutTools{
     }
 
     private getBaseGutCmd(){
-        return "godot -d  -s res://addons/gut/gut_cmdln.gd ";
+        let godot =  '/Applications/Godot.app/Contents/MacOS/Godot'
+        return godot +  " -d -s res://addons/gut/gut_cmdln.gd ";
     }
-
 
     private runAllTests(){
         let cmd = this.getBaseGutCmd();
@@ -73,14 +74,16 @@ export class GutTools{
         const activeEditor = vscode.window.activeTextEditor;
         if (activeEditor) {
             path = this.getFilePath(activeEditor);
-        }
-        
-        let cmd = this.getBaseGutCmd();
-        if(path !==  ""){
-            cmd+= " -gselect=" + path;
-        }
-        
-        this.runCmd(cmd);
+            let cmd = this.getBaseGutCmd();
+            if(path !==  ""){
+                cmd+= " -gselect=" + path;
+            }    
+            this.runCmd(cmd);
+        }else{
+            vscode.window.setStatusBarMessage("No file selected");
+            vscode.window.showErrorMessage("No file opened");
+        }        
+
     }
 
     private runAtCursor(){

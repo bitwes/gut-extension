@@ -10,25 +10,23 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onLanguage:gdscript"
+		"workspaceContains:addons/gut/gut.gd"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
 				"command": "gut-tool.run_cursor",
-				"title": "GUT(run-at-cursor)"
+				"title": "GUT: Run at Cursor"
 			},
 			{
 				"command": "gut-tool.run_all",
-				"title": "GUT(run all)"
+				"title": "GUT: Run All"
 			},
 			{
 				"command": "gut-tool.run_script",
-				"title": "GUT(run script)"
+				"title": "GUT: Run Current Script"
 			}
-
-
 		]
 	},
 	"scripts": {

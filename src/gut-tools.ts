@@ -59,7 +59,8 @@ export class GutTools{
     }
 
     private getBaseGutCmd(){
-        let godot =  '/Applications/Godot.app/Contents/MacOS/Godot'
+        let default_path =  '/Applications/Godot.app/Contents/MacOS/Godot';
+        let godot =  vscode.workspace.getConfiguration('godot_tools').get('editor_path', default_path) || default_path;
         return godot +  " -d -s res://addons/gut/gut_cmdln.gd ";
     }
 

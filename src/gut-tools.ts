@@ -25,9 +25,7 @@ export class GutTools{
     }   
 
     private runCmd(cmd:string){
-        let terminal = vscode.window.createTerminal('Gut');
-        terminal.show();
-        terminal.sendText(cmd);
+        vscode.commands.executeCommand('godot-tool.run_godot', cmd);
     }
 
     private getTestName(activeEditor:any){
@@ -58,15 +56,12 @@ export class GutTools{
         return path;
     }
 
-    private getBaseGutCmd(){
-        let default_path =  '/Applications/Godot.app/Contents/MacOS/Godot';
-        let godot =  vscode.workspace.getConfiguration('godot_tools').get('editor_path', default_path) || default_path;
-        return godot +  " -d -s res://addons/gut/gut_cmdln.gd ";
+    private getBaseGutCmd(){        
+        return `--path "${this.workspace_dir}" -d -s res://addons/gut/gut_cmdln.gd `;
     }
 
     private runAllTests(){
-        let cmd = this.getBaseGutCmd();
-        this.runCmd(cmd);
+        this.runCmd(this.getBaseGutCmd());
     }
 
     private runScript(){

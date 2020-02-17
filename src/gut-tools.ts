@@ -5,7 +5,8 @@ import * as fs from 'fs';
 export class GutTools{
 	private context: vscode.ExtensionContext;
 	private workspace_dir = vscode.workspace.rootPath;
-	private connection_status: vscode.StatusBarItem;
+    private connection_status: vscode.StatusBarItem;
+    
 
 	constructor(p_context: vscode.ExtensionContext) {
 		this.context = p_context;
@@ -23,6 +24,63 @@ export class GutTools{
             this.runScript();
         });    
     }   
+    
+    private async getSymbols(document: vscode.TextDocument): Promise<vscode.DocumentSymbol[]> {
+        return await vscode.commands.executeCommand<vscode.DocumentSymbol[]>('vscode.executeDocumentSymbolProvider', document.uri) || [];
+    }
+    
+    private async runAtCursor(){
+        let activeEditor = vscode.window.activeTextEditor;
+        if(activeEditor){
+            let doc = activeEditor.document;
+            let line  = activeEditor.selection.active.line;
+            
+            let info = await this.getSymbols(doc);            
+            let options = this.getOptionForLine(info, line);
+            this.runCmd(this.getBaseGutCmd() + " " + options);    
+        }
+    }
+
+    private getOptionForSymbolInfo(docSymbol:vscode.DocumentSymbol, line: number){
+        let opt = "";
+        if(docSymbol.range.start.line <= line && docSymbol.range.end.line >= line){
+            this.printDocumentSymbol(docSymbol);
+            if(docSymbol.kind === vscode.SymbolKind.Package){
+                if(docSymbol.name.endsWith('.gd')){
+                    opt = ` -gselect=${docSymbol.name}`;
+                }else{
+                    opt =  ` -ginner_class=${docSymbol.name}`;
+                }
+            }
+
+            if(docSymbol.kind ===  vscode.SymbolKind.Interface){
+                opt = ` -gunit_test_name=${docSymbol.name}`;
+            }
+        }
+        return  opt;
+    }
+    
+    private getOptionForLine(docSymbols:vscode.DocumentSymbol[], line:number){
+        let opts = "";
+        for (let val of docSymbols) {
+            opts += this.getOptionForSymbolInfo(val, line);
+            opts += this.getOptionForLine(val.children, line);
+        }
+        
+        return opts;
+    }
+
+    private printDocumentSymbol(docSymbol:vscode.DocumentSymbol,  indent : number = 0){
+        let pad = '  ';
+        let s = `${docSymbol.name}:  ${docSymbol.range.start.line} -> ${docSymbol.range.end.line} (${docSymbol.kind})`;
+    }
+    
+    private printDocumentSymbols(docSymbols : vscode.DocumentSymbol[], indent : number =  0){
+        docSymbols.forEach((val) =>  {
+            this.printDocumentSymbol(val, indent);
+            this.printDocumentSymbols(val.children,  indent + 1);
+        });
+    }
 
     private runCmd(cmd:string){
         vscode.commands.executeCommand('godot-tool.run_godot', cmd);
@@ -57,7 +115,7 @@ export class GutTools{
     }
 
     private getBaseGutCmd(){        
-        return `--path "${this.workspace_dir}" -d -s res://addons/gut/gut_cmdln.gd `;
+        return ` -d -s res://addons/gut/gut_cmdln.gd `;
     }
 
     private runAllTests(){
@@ -81,33 +139,4 @@ export class GutTools{
         }        
 
     }
-
-    private runAtCursor(){
-        let path = "";
-        let testName = "";
-        let innerClass = "";
-
-        const activeEditor = vscode.window.activeTextEditor;
-        if (activeEditor) {
-            path = this.getFilePath(activeEditor);
-            testName = this.getTestName(activeEditor);
-            innerClass = this.getInnerClassName(activeEditor);
-        }    
-        
-        let cmd = this.getBaseGutCmd();
-        if(path !==  ""){
-            cmd+= " -gselect=" + path;
-        }
-
-        if(testName !== ""){
-            cmd += " -gunit_test_name=" + testName;
-        }
-
-        if(innerClass !==  ""){
-            cmd += " -ginner_class=" + innerClass;
-        }
-
-        this.runCmd(cmd);
-    }
-
 }

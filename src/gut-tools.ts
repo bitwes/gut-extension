@@ -39,31 +39,39 @@ export class GutTools{
 
     private getOptionForSymbolInfo(docSymbol:vscode.DocumentSymbol, line: number){
         let opt = "";
+        
         if(docSymbol.range.start.line <= line && docSymbol.range.end.line >= line){
             this.printDocumentSymbol(docSymbol);
             if(docSymbol.kind === vscode.SymbolKind.Package){
                 if(docSymbol.name.endsWith('.gd')){
                     opt = ` -gselect=${docSymbol.name}`;
                 }else{
-                    opt =  ` -ginner_class=${docSymbol.name}`;
+                    opt = ` -ginner_class=${docSymbol.name}`;
                 }
             }
 
-            if(docSymbol.kind ===  vscode.SymbolKind.Interface){
-                let isLastEmptyLine = false
-                if(line === docSymbol.range.end.line){
-                    var lineText = vscode.window.activeTextEditor?.document.lineAt(line).text.trim();
-                    isLastEmptyLine = lineText === '';
+            if(docSymbol.kind === vscode.SymbolKind.Interface){
+                let allLinesEmpty = true;
+                let curLineNum = line;
+                
+                // Ignore the blank space between methods.  Check all lines 
+                // from the current line to the end of the method to see if 
+                // they are blank or comments.
+                while(allLinesEmpty && curLineNum <= docSymbol.range.end.line){
+                    let lineText = vscode.window.activeTextEditor?.document.lineAt(curLineNum).text.trim();
+                    if(lineText) {
+                        allLinesEmpty = lineText === '' || lineText.startsWith('#');
+                    } 
+                    curLineNum += 1;
                 }
 
                 // Ignore the method if we are in the space between methods.
-                if(!isLastEmptyLine){
+                if(!allLinesEmpty){
                     opt = ` -gunit_test_name=${docSymbol.name}`;
                 }
-                
             }
         }
-        return  opt;
+        return opt;
     }
     
     private getOptionForLine(docSymbols:vscode.DocumentSymbol[], line:number){

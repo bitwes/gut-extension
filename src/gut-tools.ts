@@ -3,14 +3,10 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 export class GutTools{
-	private context: vscode.ExtensionContext;
-	private workspace_dir = vscode.workspace.rootPath;
-    private connection_status: vscode.StatusBarItem;
-    
+	private context: vscode.ExtensionContext;    
 
 	constructor(p_context: vscode.ExtensionContext) {
 		this.context = p_context;
-		this.connection_status = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
     }
 
     public activate() {
@@ -137,6 +133,5 @@ export class GutTools{
             vscode.window.setStatusBarMessage("No file selected");
             vscode.window.showErrorMessage("No file opened");
         }        
-
     }
 }

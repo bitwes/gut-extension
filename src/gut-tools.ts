@@ -50,7 +50,17 @@ export class GutTools{
             }
 
             if(docSymbol.kind ===  vscode.SymbolKind.Interface){
-                opt = ` -gunit_test_name=${docSymbol.name}`;
+                let isLastEmptyLine = false
+                if(line === docSymbol.range.end.line){
+                    var lineText = vscode.window.activeTextEditor?.document.lineAt(line).text.trim();
+                    isLastEmptyLine = lineText === '';
+                }
+
+                // Ignore the method if we are in the space between methods.
+                if(!isLastEmptyLine){
+                    opt = ` -gunit_test_name=${docSymbol.name}`;
+                }
+                
             }
         }
         return  opt;

@@ -29,7 +29,7 @@ export class GutTools{
 	 * @param command the command to run in the terminal
 	 */
 	private reuseTerminal(terminalName:string, command:string){
-		let terminal = vscode.window.terminals.find(t => t.name === terminalName)
+		let terminal = vscode.window.terminals.find(t => t.name === terminalName);
 		if (!terminal) {
 			terminal = vscode.window.createTerminal(terminalName);
 		}

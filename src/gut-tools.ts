@@ -20,7 +20,23 @@ export class GutTools{
             this.runScript();
         });    
     }   
+
     
+    /**
+	 * Creates a new terminal or disposes and recreates a terminal with the 
+	 * given name that runs the passed in command.
+	 * @param terminalName the name of the terminal to create or reuse
+	 * @param command the command to run in the terminal
+	 */
+	private reuseTerminal(terminalName:string, command:string){
+		let terminal = vscode.window.terminals.find(t => t.name === terminalName)
+		if (!terminal) {
+			terminal = vscode.window.createTerminal(terminalName);
+		}
+		terminal.sendText(command, true);
+		terminal.show();
+	}
+
     private isGodotExtensionRunning(){
         var extension =  vscode.extensions.getExtension('geequlim.godot-tools' );
         if(!extension){
@@ -48,7 +64,7 @@ export class GutTools{
             let info = await this.getSymbols(doc);       
             if(info.length > 0){
                 let options = this.getOptionForLine(info, line);
-                this.runCmd(this.getBaseGutCmd() + " " + options +  ";exit;");        
+                this.runCmd(this.getBaseGutCmd() + " " + options);        
             }else{
                 vscode.window.showErrorMessage('Run at cursor requires the workspace to be open in the Godot Editor');
             }
@@ -124,8 +140,15 @@ export class GutTools{
         });
     }
 
-    private runCmd(cmd:string){
-        vscode.commands.executeCommand('godot-tool.run_godot', 'GutToolsTest', cmd);
+    private runCmd(options:string){
+        vscode.commands.executeCommand('godot-tool.get_run_workspace_command').then(value => {
+            if(value !== undefined){
+                this.reuseTerminal('GutToolsTest', `${value} ${options}`);
+            }            
+        }, reason => {
+            console.error(reason);
+          }
+        );
     }
 
     private getFilePath(activeEditor:any){

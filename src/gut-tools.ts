@@ -21,27 +21,61 @@ export class GutTools{
         });    
     }   
     
+    private isGodotExtensionRunning(){
+        var extension =  vscode.extensions.getExtension('geequlim.godot-tools' );
+        if(!extension){
+            vscode.window.showErrorMessage('The GUT Extension requires the godot-tools plugin.');
+        }else if(!extension?.isActive){
+            vscode.window.showErrorMessage('The GUT Extension requires the godot-tool pluign to be active.');
+        }
+        return extension?.isActive;
+    }
+
     private async getSymbols(document: vscode.TextDocument): Promise<vscode.DocumentSymbol[]> {
         return await vscode.commands.executeCommand<vscode.DocumentSymbol[]>('vscode.executeDocumentSymbolProvider', document.uri) || [];
     }
     
     private async runAtCursor(){
+        if(!this.isGodotExtensionRunning()){
+            return;
+        }
+
         let activeEditor = vscode.window.activeTextEditor;
         if(activeEditor){
             let doc = activeEditor.document;
             let line  = activeEditor.selection.active.line;
             
-            let info = await this.getSymbols(doc);            
-            let options = this.getOptionForLine(info, line);
-            this.runCmd(this.getBaseGutCmd() + " " + options);    
+            let info = await this.getSymbols(doc);       
+            if(info.length > 0){
+                let options = this.getOptionForLine(info, line);
+                this.runCmd(this.getBaseGutCmd() + " " + options +  ";exit;");        
+            }else{
+                vscode.window.showErrorMessage('Run at cursor requires the workspace to be open in the Godot Editor');
+            }
         }
     }
 
+    private getOptionForLine(docSymbols:vscode.DocumentSymbol[], line:number){
+        let opts = "";
+        for (let val of docSymbols) {
+            opts += this.getOptionForSymbolInfo(val, line);
+            opts += this.getOptionForLine(val.children, line);
+        }
+        
+        return opts;
+    }
+
+    /**
+     * The Godot extension will populate the DocumentSymbol, so this only 
+     * works if the Editor has been launched for the workspace.
+     */
     private getOptionForSymbolInfo(docSymbol:vscode.DocumentSymbol, line: number){
         let opt = "";
-        
+            
         if(docSymbol.range.start.line <= line && docSymbol.range.end.line >= line){
             this.printDocumentSymbol(docSymbol);
+            // The GOdot plugin uses Package for both the file and for inner
+            // classes.
             if(docSymbol.kind === vscode.SymbolKind.Package){
                 if(docSymbol.name.endsWith('.gd')){
                     opt = ` -gselect=${docSymbol.name}`;
@@ -50,6 +84,7 @@ export class GutTools{
                 }
             }
 
+            // The Godot plugin uses Interface for methods.
             if(docSymbol.kind === vscode.SymbolKind.Interface){
                 let allLinesEmpty = true;
                 let curLineNum = line;
@@ -65,7 +100,10 @@ export class GutTools{
                     curLineNum += 1;
                 }
 
-                // Ignore the method if we are in the space between methods.
+                // When they are not all blank then we are in a method so add
+                // that to the options.  When they are all blank then we are in
+                // the space between two methods so don't add the options so 
+                // that the Inner class or file is run.
                 if(!allLinesEmpty){
                     opt = ` -gunit_test_name=${docSymbol.name}`;
                 }
@@ -74,16 +112,6 @@ export class GutTools{
         return opt;
     }
     
-    private getOptionForLine(docSymbols:vscode.DocumentSymbol[], line:number){
-        let opts = "";
-        for (let val of docSymbols) {
-            opts += this.getOptionForSymbolInfo(val, line);
-            opts += this.getOptionForLine(val.children, line);
-        }
-        
-        return opts;
-    }
-
     private printDocumentSymbol(docSymbol:vscode.DocumentSymbol,  indent : number = 0){
         let pad = '  ';
         let s = `${docSymbol.name}:  ${docSymbol.range.start.line} -> ${docSymbol.range.end.line} (${docSymbol.kind})`;
@@ -97,29 +125,7 @@ export class GutTools{
     }
 
     private runCmd(cmd:string){
-        vscode.commands.executeCommand('godot-tool.run_godot', cmd);
-    }
-
-    private getTestName(activeEditor:any){
-        let name = "";
-        var line =  activeEditor.selection.active.line;
-        var lineText = activeEditor.document.lineAt(line).text.trim();
-        if(lineText.startsWith("func ")){
-            lineText = lineText.replace("func ", '').replace("():", '').trim();
-            name = lineText;
-        }            
-        return name;
-    }
-
-    private getInnerClassName(activeEditor:any){
-        let name = "";
-        var line =  activeEditor.selection.active.line;
-        var lineText = activeEditor.document.lineAt(line).text.trim();
-        if(lineText.startsWith("class")){
-            lineText = lineText.replace("class", '').replace(":", '').trim();
-            name = lineText;
-        }            
-        return name;
+        vscode.commands.executeCommand('godot-tool.run_godot', 'GutToolsTest', cmd);
     }
 
     private getFilePath(activeEditor:any){
@@ -133,10 +139,17 @@ export class GutTools{
     }
 
     private runAllTests(){
+        if(!this.isGodotExtensionRunning()){
+            return;
+        }
         this.runCmd(this.getBaseGutCmd());
     }
 
     private runScript(){
+        if(!this.isGodotExtensionRunning()){
+            return;
+        }
+
         let path = "";
 
         const activeEditor = vscode.window.activeTextEditor;

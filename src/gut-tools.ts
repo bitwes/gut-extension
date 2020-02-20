@@ -23,8 +23,8 @@ export class GutTools{
 
     
     /**
-	 * Creates a new terminal or disposes and recreates a terminal with the 
-	 * given name that runs the passed in command.
+	 * Creates a new terminal with the specified name or reuses the existing 
+     * one.
 	 * @param terminalName the name of the terminal to create or reuse
 	 * @param command the command to run in the terminal
 	 */
@@ -48,7 +48,8 @@ export class GutTools{
     }
 
     private async getSymbols(document: vscode.TextDocument): Promise<vscode.DocumentSymbol[]> {
-        return await vscode.commands.executeCommand<vscode.DocumentSymbol[]>('vscode.executeDocumentSymbolProvider', document.uri) || [];
+        return await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
+            'vscode.executeDocumentSymbolProvider', document.uri) || [];
     }
     
     private async runAtCursor(){
@@ -64,7 +65,7 @@ export class GutTools{
             let info = await this.getSymbols(doc);       
             if(info.length > 0){
                 let options = this.getOptionForLine(info, line);
-                this.runCmd(this.getBaseGutCmd() + " " + options);        
+                this.runCmd(this.getBaseGutCmd() + " " + options +  ";exit;");        
             }else{
                 vscode.window.showErrorMessage('Run at cursor requires the workspace to be open in the Godot Editor');
             }

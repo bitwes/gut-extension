@@ -1,9 +1,11 @@
 import * as vscode from "vscode";
 import * as path from 'path';
 import * as fs from 'fs';
+import { GodotBorrowedTools } from "./utils";
 
 export class GutTools{
-	private context: vscode.ExtensionContext;    
+    private context: vscode.ExtensionContext;    
+    private GodotTools = new GodotBorrowedTools();
 
 	constructor(p_context: vscode.ExtensionContext) {
 		this.context = p_context;
@@ -65,7 +67,7 @@ export class GutTools{
             let info = await this.getSymbols(doc);       
             if(info.length > 0){
                 let options = this.getOptionForLine(info, line);
-                this.runCmd(this.getBaseGutCmd() + " " + options +  ";exit;");        
+                this.runCmd(this.getBaseGutCmd() + " " + options);        
             }else{
                 vscode.window.showErrorMessage('Run at cursor requires the workspace to be open in the Godot Editor');
             }
@@ -142,14 +144,10 @@ export class GutTools{
     }
 
     private runCmd(options:string){
-        vscode.commands.executeCommand('godot-tool.get_run_workspace_command').then(value => {
-            if(value !== undefined){
-                this.reuseTerminal('GutToolsTest', `${value} ${options}`);
-            }            
-        }, reason => {
-            console.error(reason);
-          }
-        );
+        let cmd = this.GodotTools.getRunGodotCommand();
+        if(cmd){
+            this.reuseTerminal('GutToolsTest', `${cmd} ${options}`);
+        }
     }
 
     private getFilePath(activeEditor:any){

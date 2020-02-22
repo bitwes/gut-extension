@@ -18,18 +18,33 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "gut-tool.run_cursor",
+				"command": "gut-extension.run_cursor",
 				"title": "GUT: Run at Cursor"
 			},
 			{
-				"command": "gut-tool.run_all",
+				"command": "gut-extension.run_all",
 				"title": "GUT: Run All"
 			},
 			{
-				"command": "gut-tool.run_script",
+				"command": "gut-extension.run_script",
 				"title": "GUT: Run Current Script"
+			},
+			{
+				"command": "gut-extension.show_help",
+				"title": "GUT: Show Help"
 			}
-		]
+
+		],
+		"configuration":{
+			"title": "GUT Configuration",
+			"properties": {
+				"gut-extension.additionalOptions":{
+					"type":"string",
+					"default":"-d",
+					"description": "Additional Godot and/or GUT options to use when running GUT.  The default is the debug option for Godot (-d).  See the GUT wiki for more options https://github.com/bitwes/Gut/wiki/Command-Line"
+				}
+			}
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",

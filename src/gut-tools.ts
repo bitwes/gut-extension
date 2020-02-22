@@ -7,15 +7,18 @@ export class GutTools{
 	constructor() {}
 
     public activate() {
-        vscode.commands.registerCommand("gut-tool.run_cursor", ()=>{
+        vscode.commands.registerCommand("gut-extension.run_cursor", ()=>{
             this.runAtCursor();
         });
-        vscode.commands.registerCommand("gut-tool.run_all", ()=>{
+        vscode.commands.registerCommand("gut-extension.run_all", ()=>{
             this.runAllTests();
         });    
-        vscode.commands.registerCommand("gut-tool.run_script", ()=>{
+        vscode.commands.registerCommand("gut-extension.run_script", ()=>{
             this.runScript();
-        });    
+        });
+        vscode.commands.registerCommand("gut-extension.show_help", ()=>{
+            this.showHelp();
+        });
     }   
     
     /**
@@ -50,6 +53,30 @@ export class GutTools{
     }
 
     /**
+     * Checks the document for the passed in editor and verifies it is a valid
+     * file to attempt to run GUT with.  Shows error messages when it is not,
+     * returns true/false based on if the file is valid.
+     * @param activeEditor The editor to check.
+     */
+    private isActiveEditorFileValid(activeEditor:any):boolean{
+        let toReturn = false;
+        
+        if (activeEditor) {
+            let path = this.getFilePath(activeEditor);
+            if(path !==  ""){
+                if(path.endsWith('.gd')){
+                    toReturn = true;
+                }else{
+                    vscode.window.showErrorMessage('Current file is not a GDScript file.');
+                }
+            }        
+        }else{
+            vscode.window.showErrorMessage("No file currently has focus.");
+        }        
+        return toReturn;
+    }
+
+    /**
      * Gets the symbol tree for the opened file.  This tree is created by the 
      * Godot Tools Extension for .gd files.
      * @param document 
@@ -59,31 +86,6 @@ export class GutTools{
             'vscode.executeDocumentSymbolProvider', document.uri) || [];
     }
     
-    /**
-     * Runs GUT for the currently focused file, inner class, and test method.
-     */
-    private async runAtCursor(){
-        if(!this.isGodotExtensionRunning()){
-            return;
-        }
-
-        let activeEditor = vscode.window.activeTextEditor;
-        if(activeEditor){
-            let doc = activeEditor.document;
-            let line  = activeEditor.selection.active.line;
-            
-            let info = await this.getSymbols(doc);       
-            if(info.length > 0){
-                let options = this.getOptionForLine(info, line);
-                this.runGut(options);        
-            }else{
-                vscode.window.showErrorMessage(
-                    'Run at cursor requires the workspace to be open in the ' +
-                    'Godot Editor');
-            }
-        }
-    }
-
     /**
      * Get the GUT option for the line number that is passed in.
      * @param docSymbols Symbols for the document
@@ -107,7 +109,7 @@ export class GutTools{
         let opt = "";
             
         if(docSymbol.range.start.line <= line && docSymbol.range.end.line >= line){
-            // The GOdot plugin uses Package for both the file and for inner
+            // The Godot plugin uses Package for both the file and for inner
             // classes.
             if(docSymbol.kind === vscode.SymbolKind.Package){
                 if(docSymbol.name.endsWith('.gd')){
@@ -152,12 +154,12 @@ export class GutTools{
      */
     private runGut(options:string = ''){
         let cmd = this.GodotTools.getRunGodotCommand();
-        cmd += ' -d -s res://addons/gut/gut_cmdln.gd ';
+        let configOpts = vscode.workspace.getConfiguration('gut-extension').get('additionalOptions', '') || '';
+        cmd += ' -s res://addons/gut/gut_cmdln.gd ';
         if(cmd){
-            this.reuseTerminal('GutToolsTest', `${cmd} ${options}`);
+            this.reuseTerminal('GutToolsTest', `${cmd} ${configOpts} ${options}`);
         }
     }
-
 
     /**
      * Gets the path for the file open in the passed in Editor.
@@ -187,19 +189,45 @@ export class GutTools{
             return;
         }
 
-        let path = "";
-
         const activeEditor = vscode.window.activeTextEditor;
-        if (activeEditor) {
-            path = this.getFilePath(activeEditor);
-            let cmd = '';
-            if(path !==  ""){
-                cmd+= " -gselect=" + path;
-            }    
-            this.runGut(cmd);
-        }else{
-            vscode.window.setStatusBarMessage("No file selected");
-            vscode.window.showErrorMessage("No file opened");
-        }        
+        if(this.isActiveEditorFileValid(activeEditor)){
+            let path = this.getFilePath(activeEditor);
+            this.runGut(" -gselect=" + path);
+        }
+    }
+
+    /**
+     * Runs GUT for the currently focused file, inner class, and test method.
+     */
+    private async runAtCursor(){
+        if(!this.isGodotExtensionRunning()){
+            return;
+        }
+
+        let activeEditor = vscode.window.activeTextEditor;
+        // Have to "&& activeEditor" or vscode thinks it hasn't been checked for 
+        // undefined.  Must check it 2nd or we don't get all the error messages
+        // out of isActiveEditorFileValid.
+        if(this.isActiveEditorFileValid(activeEditor) && activeEditor){
+            let doc = activeEditor.document;
+            let line  = activeEditor.selection.active.line;
+            
+            let info = await this.getSymbols(doc);       
+            if(info.length > 0){
+                let options = this.getOptionForLine(info, line);
+                this.runGut(options);        
+            }else{
+                vscode.window.showErrorMessage(
+                    'Run at cursor requires the workspace to be open in the ' +
+                    'Godot Editor');
+            }
+        }
+    }
+
+    /**
+     * Shows GUT help in the terminal window.
+     */
+    private showHelp(){
+        this.runGut('-gh');
     }
 }

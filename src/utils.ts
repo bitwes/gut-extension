@@ -65,7 +65,7 @@ export class GodotBorrowedTools {
     private verifyEditorPathSetting(editorPath:string){
         let isValid = false;
         if (!fs.existsSync(editorPath) || !fs.statSync(editorPath).isFile()) {
-            vscode.window.showErrorMessage(`Could not find ${editorPath}.  Please verify that the Godot_tools:Editor_path setting has a proper value.`)
+            vscode.window.showErrorMessage(`Could not find ${editorPath}.  Please verify that the Godot_tools:Editor_path setting has a proper value.`);
         } else {
             isValid = true;
         }

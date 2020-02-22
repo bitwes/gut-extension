@@ -1,6 +1,18 @@
 import * as vscode from "vscode";
-import * as path from 'path';
 import * as fs from 'fs';
+
+export function printDocumentSymbol(docSymbol:vscode.DocumentSymbol,  indent : number = 0){
+    let pad = '  ';
+    let s = `${docSymbol.name}:  ${docSymbol.range.start.line} -> ${docSymbol.range.end.line} (${docSymbol.kind})`;
+    console.log(s);
+}
+
+export function printDocumentSymbols(docSymbols : vscode.DocumentSymbol[], indent : number =  0){
+    docSymbols.forEach((val) =>  {
+        printDocumentSymbol(val, indent);
+        printDocumentSymbols(val.children,  indent + 1);
+    });
+}
 
 /**
  * This class contains logic from the godot_tools vscode extension.  This is 

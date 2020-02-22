@@ -2,9 +2,9 @@
 	"name": "gut-extension",
 	"displayName": "gut-extension",
 	"description": "run gut",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"repository": "https://github.com/bitwes/gut-extension",
-	"publisher":"ButchWesley",
+	"publisher":"bitwes",
 	"engines": {
 		"vscode": "^1.42.0"
 	},
@@ -52,5 +52,8 @@
 		"mocha": "^7.0.1",
 		"typescript": "^3.7.5",
 		"vscode-test": "^1.3.0"
-	}
+	},
+	"extensionDependencies": [
+		"geequlim.godot-tools"
+	]
 }

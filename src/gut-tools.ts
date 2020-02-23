@@ -113,9 +113,9 @@ export class GutTools{
             // classes.
             if(docSymbol.kind === vscode.SymbolKind.Package){
                 if(docSymbol.name.endsWith('.gd')){
-                    opt = ` -gselect=${docSymbol.name}`;
+                    opt = this.optionSelectScript(docSymbol.name);
                 }else{
-                    opt = ` -ginner_class=${docSymbol.name}`;
+                    opt = this.optionInnerClass(docSymbol.name);
                 }
             }
 
@@ -172,6 +172,25 @@ export class GutTools{
     }
 
     /**
+     * Get the option to select a script based on the current platform.
+     * @param scriptPath the name of the script to run
+     */
+    private optionSelectScript(scriptPath:string):string{
+        return " -gselect=" + this.GodotTools.wrapForPS(scriptPath);
+    }
+
+    /**
+     * Get the option to run an inner class based ont he current platform.
+     * @param clasName The inner class name
+     */
+    private optionInnerClass(clasName:string):string{
+        // technically this doesn't require "" since these class names can't
+        // have characters that need to be escaped for powershell, but who
+        // knows when that might change.
+        return " -ginner_class=" + this.GodotTools.wrapForPS(clasName);
+    }
+
+    /**
      * Runs the entire test suite.
      */
     private runAllTests(){
@@ -192,7 +211,7 @@ export class GutTools{
         const activeEditor = vscode.window.activeTextEditor;
         if(this.isActiveEditorFileValid(activeEditor)){
             let path = this.getFilePath(activeEditor);
-            this.runGut(" -gselect=" + path);
+            this.runGut(this.optionSelectScript(path));
         }
     }
 

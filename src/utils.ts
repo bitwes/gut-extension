@@ -25,16 +25,33 @@ export class GodotBorrowedTools {
     private get_configuration(name: string, default_value: any = null) {
         return vscode.workspace.getConfiguration(this.CONFIG_CONTAINER).get(name, default_value) || default_value;
     }
-        
-    private escapeCommand(cmd: string){
-        let cmdEsc = `"${cmd}"`;
+    
+    public isShellPowershell(){
+        let itIs = false;
         if (process.platform === "win32") {
             const POWERSHELL = "powershell.exe";
             const shell_plugin = vscode.workspace.getConfiguration("terminal.integrated.shell");
+            // the default is powershell if not set.
             let shell = (shell_plugin ? shell_plugin.get("windows", POWERSHELL) : POWERSHELL) || POWERSHELL;
-            if (shell.endsWith(POWERSHELL)) {
-                cmdEsc = `&${cmdEsc}`;
+            if (shell.endsWith(POWERSHELL) || shell.endsWith('pwsh.exe')) {
+                itIs = true;
             }
+        }
+        return itIs;
+    }
+
+    public wrapForPS(value:string) : string{
+        let wrapped = value;
+        if(this.isShellPowershell()){
+            wrapped = `"${wrapped}"`;
+        }
+        return wrapped;
+    }
+
+    private escapeCommand(cmd: string){
+        let cmdEsc = `"${cmd}"`;
+        if(this.isShellPowershell()){
+            cmdEsc = `&${cmdEsc}`;
         }
         return cmdEsc;
     }

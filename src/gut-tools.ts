@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import { GodotBorrowedTools } from "./utils";
+import { CommandLineUtils } from "./utils";
 
 export class GutTools{
-    private GodotTools = new GodotBorrowedTools();
+    private cmdUtils = new CommandLineUtils();
 
 	constructor() {}
 
@@ -113,9 +113,9 @@ export class GutTools{
             // classes.
             if(docSymbol.kind === vscode.SymbolKind.Package){
                 if(docSymbol.name.endsWith('.gd')){
-                    opt = ` -gselect=${docSymbol.name}`;
+                    opt = this.optionSelectScript(docSymbol.name);
                 }else{
-                    opt = ` -ginner_class=${docSymbol.name}`;
+                    opt = this.optionInnerClass(docSymbol.name);
                 }
             }
 
@@ -140,7 +140,7 @@ export class GutTools{
                 // the space between two methods so don't add the options so 
                 // that the Inner class or file is run.
                 if(!allLinesEmpty){
-                    opt = ` -gunit_test_name=${docSymbol.name}`;
+                    opt = this.optionUnitTestname(docSymbol.name);
                 }
             }
         }
@@ -153,7 +153,7 @@ export class GutTools{
      * @param options other GUT or Godot options
      */
     private runGut(options:string = ''){
-        let cmd = this.GodotTools.getRunGodotCommand();
+        let cmd = this.cmdUtils.getRunGodotCommand();
         let configOpts = vscode.workspace.getConfiguration('gut-extension').get('additionalOptions', '') || '';
         cmd += ' -s res://addons/gut/gut_cmdln.gd ';
         if(cmd){
@@ -169,6 +169,34 @@ export class GutTools{
         let path = activeEditor.document.uri.toString();
         path = path.replace(/^.*[\\\/]/, '');
         return path;
+    }
+
+    /**
+     * Get the option to select a script based on the current platform.
+     * @param scriptPath the name of the script to run
+     */
+    private optionSelectScript(scriptPath:string):string{
+        return " -gselect=" + this.cmdUtils.wrapForPS(scriptPath);
+    }
+
+    /**
+     * Get the option to run an inner class based ont he current platform.
+     * @param clasName The inner class name
+     */
+    private optionInnerClass(clasName:string):string{
+        // technically this doesn't require "" since these class names can't
+        // have characters that need to be escaped for powershell, but who
+        // knows when that might change.
+        return " -ginner_class=" + this.cmdUtils.wrapForPS(clasName);
+    }
+
+    /**
+     * Get the option to run a test with the given name.
+     * @param testName The name of the test to run
+     */
+    private optionUnitTestname(testName:string):string{
+        // This is the same case as optionInnerClass, wrapping for good measure.
+        return " -gunit_test_name=" + this.cmdUtils.wrapForPS(testName);
     }
 
     /**
@@ -192,7 +220,7 @@ export class GutTools{
         const activeEditor = vscode.window.activeTextEditor;
         if(this.isActiveEditorFileValid(activeEditor)){
             let path = this.getFilePath(activeEditor);
-            this.runGut(" -gselect=" + path);
+            this.runGut(this.optionSelectScript(path));
         }
     }
 

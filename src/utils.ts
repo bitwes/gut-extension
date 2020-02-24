@@ -18,23 +18,52 @@ export function printDocumentSymbols(docSymbols : vscode.DocumentSymbol[], inden
  * This class contains logic from the godot_tools vscode extension.  This is 
  * should be deleted after the PR for new non-pallette commands is merged.
  */
-export class GodotBorrowedTools {
+export class CommandLineUtils {
     private workspace_dir = vscode.workspace.rootPath;
     private CONFIG_CONTAINER = "godot_tools";
 
     private get_configuration(name: string, default_value: any = null) {
         return vscode.workspace.getConfiguration(this.CONFIG_CONTAINER).get(name, default_value) || default_value;
     }
-        
-    private escapeCommand(cmd: string){
-        let cmdEsc = `"${cmd}"`;
+    
+    /**
+     * Checks if the configured shell is powershell.exe or pwsh.exe
+     */
+    private isShellPowershell(){
+        let itIs = false;
         if (process.platform === "win32") {
             const POWERSHELL = "powershell.exe";
             const shell_plugin = vscode.workspace.getConfiguration("terminal.integrated.shell");
+            // the default is powershell if not set.
             let shell = (shell_plugin ? shell_plugin.get("windows", POWERSHELL) : POWERSHELL) || POWERSHELL;
-            if (shell.endsWith(POWERSHELL)) {
-                cmdEsc = `&${cmdEsc}`;
+            if (shell.endsWith(POWERSHELL) || shell.endsWith('pwsh.exe')) {
+                itIs = true;
             }
+        }
+        return itIs;
+    }
+
+    /**
+     * Wraps the value with double quotes if the terminal being used is Powershell.
+     * @param value the value to be wrapped
+     */
+    public wrapForPS(value:string) : string{
+        let wrapped = value;
+        if(this.isShellPowershell()){
+            wrapped = `"${wrapped}"`;
+        }
+        return wrapped;
+    }
+
+    /**
+     * Wraps the command with double quotes and prepends a & when the current
+     * shell is powershell.
+     * @param cmd a command
+     */
+    private escapeCommand(cmd: string){
+        let cmdEsc = `"${cmd}"`;
+        if(this.isShellPowershell()){
+            cmdEsc = `&${cmdEsc}`;
         }
         return cmdEsc;
     }

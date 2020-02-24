@@ -2,9 +2,9 @@
 	"name": "gut-extension",
 	"displayName": "gut-extension",
 	"description": "run gut",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"repository": "https://github.com/bitwes/gut-extension",
-	"publisher":"bitwes",
+	"publisher": "bitwes",
 	"engines": {
 		"vscode": "^1.42.0"
 	},
@@ -33,14 +33,13 @@
 				"command": "gut-extension.show_help",
 				"title": "GUT: Show Help"
 			}
-
 		],
-		"configuration":{
+		"configuration": {
 			"title": "GUT Configuration",
 			"properties": {
-				"gut-extension.additionalOptions":{
-					"type":"string",
-					"default":"-d",
+				"gut-extension.additionalOptions": {
+					"type": "string",
+					"default": "-d",
 					"description": "Additional Godot and/or GUT options to use when running GUT.  The default is the debug option for Godot (-d).  See the GUT wiki for more options https://github.com/bitwes/Gut/wiki/Command-Line"
 				}
 			}
@@ -59,7 +58,6 @@
 		"@types/mocha": "^7.0.1",
 		"@types/node": "^12.11.7",
 		"@types/vscode": "^1.42.0",
-		
 		"eslint": "^6.8.0",
 		"@typescript-eslint/parser": "^2.18.0",
 		"@typescript-eslint/eslint-plugin": "^2.18.0",

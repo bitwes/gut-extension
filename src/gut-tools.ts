@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import { GodotBorrowedTools } from "./utils";
+import { CommandLineUtils } from "./utils";
 
 export class GutTools{
-    private GodotTools = new GodotBorrowedTools();
+    private cmdUtils = new CommandLineUtils();
 
 	constructor() {}
 
@@ -140,7 +140,7 @@ export class GutTools{
                 // the space between two methods so don't add the options so 
                 // that the Inner class or file is run.
                 if(!allLinesEmpty){
-                    opt = ` -gunit_test_name=${docSymbol.name}`;
+                    opt = this.optionUnitTestname(docSymbol.name);
                 }
             }
         }
@@ -153,7 +153,7 @@ export class GutTools{
      * @param options other GUT or Godot options
      */
     private runGut(options:string = ''){
-        let cmd = this.GodotTools.getRunGodotCommand();
+        let cmd = this.cmdUtils.getRunGodotCommand();
         let configOpts = vscode.workspace.getConfiguration('gut-extension').get('additionalOptions', '') || '';
         cmd += ' -s res://addons/gut/gut_cmdln.gd ';
         if(cmd){
@@ -176,7 +176,7 @@ export class GutTools{
      * @param scriptPath the name of the script to run
      */
     private optionSelectScript(scriptPath:string):string{
-        return " -gselect=" + this.GodotTools.wrapForPS(scriptPath);
+        return " -gselect=" + this.cmdUtils.wrapForPS(scriptPath);
     }
 
     /**
@@ -187,7 +187,16 @@ export class GutTools{
         // technically this doesn't require "" since these class names can't
         // have characters that need to be escaped for powershell, but who
         // knows when that might change.
-        return " -ginner_class=" + this.GodotTools.wrapForPS(clasName);
+        return " -ginner_class=" + this.cmdUtils.wrapForPS(clasName);
+    }
+
+    /**
+     * Get the option to run a test with the given name.
+     * @param testName The name of the test to run
+     */
+    private optionUnitTestname(testName:string):string{
+        // This is the same case as optionInnerClass, wrapping for good measure.
+        return " -gunit_test_name=" + this.cmdUtils.wrapForPS(testName);
     }
 
     /**

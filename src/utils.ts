@@ -18,7 +18,7 @@ export function printDocumentSymbols(docSymbols : vscode.DocumentSymbol[], inden
  * This class contains logic from the godot_tools vscode extension.  This is 
  * should be deleted after the PR for new non-pallette commands is merged.
  */
-export class GodotBorrowedTools {
+export class CommandLineUtils {
     private workspace_dir = vscode.workspace.rootPath;
     private CONFIG_CONTAINER = "godot_tools";
 
@@ -26,7 +26,10 @@ export class GodotBorrowedTools {
         return vscode.workspace.getConfiguration(this.CONFIG_CONTAINER).get(name, default_value) || default_value;
     }
     
-    public isShellPowershell(){
+    /**
+     * Checks if the configured shell is powershell.exe or pwsh.exe
+     */
+    private isShellPowershell(){
         let itIs = false;
         if (process.platform === "win32") {
             const POWERSHELL = "powershell.exe";
@@ -40,6 +43,10 @@ export class GodotBorrowedTools {
         return itIs;
     }
 
+    /**
+     * Wraps the value with double quotes if the terminal being used is Powershell.
+     * @param value the value to be wrapped
+     */
     public wrapForPS(value:string) : string{
         let wrapped = value;
         if(this.isShellPowershell()){
@@ -48,6 +55,11 @@ export class GodotBorrowedTools {
         return wrapped;
     }
 
+    /**
+     * Wraps the command with double quotes and prepends a & when the current
+     * shell is powershell.
+     * @param cmd a command
+     */
     private escapeCommand(cmd: string){
         let cmdEsc = `"${cmd}"`;
         if(this.isShellPowershell()){

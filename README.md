@@ -42,3 +42,6 @@ __Possible Uses__
  * Provide other Godot options or remove the debug mode option.
  
  It is recommended that you use a `.gutconfig.json`, the file is easier to manage than the setting, but we won't judge.
+
+#### `gut-extension.discardTerminal`
+A boolean value that decides if subsequent launches of GUT will discard the existing terminal window and create a new one or reuse the existing one.  When not checked you must kill Godot manually if an error occurs.  If you do not then subsequent runs of GUT will not work.  The upside to leaving this unchecked is that output from previous runs is preserved in the terminal.

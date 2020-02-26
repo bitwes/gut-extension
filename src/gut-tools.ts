@@ -22,16 +22,42 @@ export class GutTools{
     }   
     
     /**
-	 * Creates a new terminal with the specified name or reuses the existing 
-     * one.
+     * Get a gut-extension configuration paramter value.  If it does not exist
+     * then log and return the default.
+     * 
+     * @param name The name of the gut-extension config parameter to get
+     * @param defaultValue The default value to be returned, the default default is undefined
+     */
+    private getGutExtensionSetting(name:string, defaultValue:any = undefined){
+        let value = vscode.workspace.getConfiguration('gut-extension').get(name);
+        if(value === undefined){
+            console.log(`Missing config for:  gut-extension.${name}`);
+            value = defaultValue;
+        }
+        return value;
+    }
+
+    /**
+	 * Runs a command in a terminal with the specified name.  Depending on the 
+     * value of the discardTerminal setting this will either dispose of an 
+     * existing terminal with that name and create a new or use the existing one.
+     * 
 	 * @param terminalName the name of the terminal to create or reuse
 	 * @param command the command to run in the terminal
 	 */
 	private reuseTerminal(terminalName:string, command:string){
-		let terminal = vscode.window.terminals.find(t => t.name === terminalName);
+        let terminal = vscode.window.terminals.find(t => t.name === terminalName);
+        let shouldDiscard = this.getGutExtensionSetting('discardTerminal', true);
+
+        if(shouldDiscard && terminal){
+            terminal.dispose();
+            terminal = undefined;
+        }
+        
 		if (!terminal) {
 			terminal = vscode.window.createTerminal(terminalName);
-		}
+        }
+        
 		terminal.sendText(command, true);
 		terminal.show();
 	}
@@ -154,7 +180,7 @@ export class GutTools{
      */
     private runGut(options:string = ''){
         let cmd = this.cmdUtils.getRunGodotCommand();
-        let configOpts = vscode.workspace.getConfiguration('gut-extension').get('additionalOptions', '') || '';
+        let configOpts = this.getGutExtensionSetting('additionalOptions', '');
         cmd += ' -s res://addons/gut/gut_cmdln.gd ';
         if(cmd){
             this.reuseTerminal('GutToolsTest', `${cmd} ${configOpts} ${options}`);

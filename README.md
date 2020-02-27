@@ -1,6 +1,7 @@
 # GUT Tools VSCode Extension
 Tools to run your unit/integration tests created with the [GUT framework](https://github.com/bitwes/Gut/).
 
+[Quick Tutorial on setup and using the extension](https://youtu.be/pqcA8A52CMs)
 ## Available Commands
 * `GUT: Show Help` - Displays the GUT command line help in the terminal window.
 * `GUT: Run All` - Runs the entire test suite.

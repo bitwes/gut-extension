@@ -2,7 +2,7 @@
 	"name": "gut-extension",
 	"displayName": "gut-extension",
 	"description": "run gut",
-	"version": "0.0.4",
+	"version": "0.0.5",
 	"repository": "https://github.com/bitwes/gut-extension",
 	"publisher": "bitwes",
 	"engines": {

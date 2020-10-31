@@ -12,7 +12,7 @@
 		"Other"
 	],
 	"activationEvents": [
-		"workspaceContains:addons/gut/gut.gd"
+		"workspaceContains:**/addons/gut/gut.gd"
 	],
 	"main": "./out/extension.js",
 	"contributes": {

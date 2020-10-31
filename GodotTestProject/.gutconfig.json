@@ -1,0 +1,7 @@
+{"background_color":"ff262626",
+    "dirs":["res://test/"],
+    "ignore_pause":false,
+    "include_subdirs":true,
+    "log_level":1,
+    "should_exit":true
+}

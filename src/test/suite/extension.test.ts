@@ -2,8 +2,8 @@ import * as assert from 'assert';
 // -----------------------------------------------------------------------------
 // You found my secret, don't tell anyone.
 //
-// Yes, it doesn't feel right to have a tool for running unit tests that does 
-// not contain unit tsts itself.  It is hypocritial.  Maybe one day.  
+// Yes, it doesn't feel right to have a tool for running unit tests that does
+// not contain unit tests itself.  It is hypocritial.  Maybe one day.
 // -----------------------------------------------------------------------------
 
 // You can import and use all API from the 'vscode' module

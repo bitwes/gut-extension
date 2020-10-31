@@ -15,7 +15,7 @@ export function printDocumentSymbols(docSymbols : vscode.DocumentSymbol[], inden
 }
 
 /**
- * This class contains logic from the godot_tools vscode extension.  This is 
+ * This class contains logic from the godot_tools vscode extension.  This
  * should be deleted after the PR for new non-pallette commands is merged.
  */
 export class CommandLineUtils {
@@ -25,7 +25,7 @@ export class CommandLineUtils {
     private get_configuration(name: string, default_value: any = null) {
         return vscode.workspace.getConfiguration(this.CONFIG_CONTAINER).get(name, default_value) || default_value;
     }
-    
+
     /**
      * Checks if the configured shell is powershell.exe or pwsh.exe
      */
@@ -70,15 +70,15 @@ export class CommandLineUtils {
 
     /**
      * Returns a string that can be used to launch Godot for the current
-     * workspace.  This uses the editor_path setting.  If that value of that 
-     * setting cannot be found on the file system then undefined will be 
+     * workspace.  This uses the editor_path setting.  If that value of that
+     * setting cannot be found on the file system then undefined will be
      * returned and an error message will be displayed on the screen.
      */
     public getRunGodotCommand(){
         let editorPath = this.get_configuration("editor_path", "");
         if(this.verifyEditorPathSetting(editorPath)){
             editorPath = editorPath.replace("${workspaceRoot}", this.workspace_dir);
-            editorPath = this.escapeCommand(editorPath);	
+            editorPath = this.escapeCommand(editorPath);
         } else {
             editorPath = undefined;
         }
@@ -87,7 +87,7 @@ export class CommandLineUtils {
 
     /**
      * Verifies that the path passed in exists.  If it does not then an error
-     * message will be displayed and false will be returned.  Otherwise true 
+     * message will be displayed and false will be returned.  Otherwise true
      * will be returned.
      * @param editorPath The path to the godot executable
      */

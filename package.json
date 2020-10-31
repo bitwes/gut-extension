@@ -2,7 +2,7 @@
 	"name": "gut-extension",
 	"displayName": "gut-extension",
 	"description": "run gut",
-	"version": "0.0.5",
+	"version": "0.1.0",
 	"repository": "https://github.com/bitwes/gut-extension",
 	"publisher": "bitwes",
 	"engines": {
@@ -43,9 +43,9 @@
 					"description": "Additional Godot and/or GUT options to use when running GUT.  The default is the debug option for Godot (-d).  See the GUT wiki for more options https://github.com/bitwes/Gut/wiki/Command-Line"
 				},
 				"gut-extension.discardTerminal": {
-					"type":"boolean",
-					"default":true,
-					"description":"Subsequent launches of GUT will discard the existing terminal window and create a new one.  When not checked you must kill Godot manually if an error occurs."
+					"type": "boolean",
+					"default": true,
+					"description": "Subsequent launches of GUT will discard the existing terminal window and create a new one.  When not checked you must kill Godot manually if an error occurs."
 				}
 			}
 		}

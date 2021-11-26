@@ -1,6 +1,8 @@
 # GUT Tools VSCode Extension
 Tools to run your unit/integration tests created with the [GUT framework](https://github.com/bitwes/Gut/).
 
+#### Requires Godot 3.4
+
 [Short tutorial on setup and using the extension.](https://youtu.be/pqcA8A52CMs)
 ## Available Commands
 * `GUT: Show Help` - Displays the GUT command line help in the terminal window.
@@ -39,9 +41,9 @@ Any option that the GUT command line tool accepts can be configured in the `gutc
 
 __Possible Uses__
  * Use an alternate `.gutconfig.json` file.
- * Skip the `.gutconfig.json` file and add options to set your directories and other options.  
+ * Skip the `.gutconfig.json` file and add options to set your directories and other options.
  * Provide other Godot options or remove the debug mode option.
- 
+
  It is recommended that you use a `.gutconfig.json`, the file is easier to manage than the setting, but we won't judge.
 
 #### `gut-extension.discardTerminal`

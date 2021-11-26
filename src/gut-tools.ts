@@ -12,19 +12,19 @@ export class GutTools{
         });
         vscode.commands.registerCommand("gut-extension.run_all", ()=>{
             this.runAllTests();
-        });    
+        });
         vscode.commands.registerCommand("gut-extension.run_script", ()=>{
             this.runScript();
         });
         vscode.commands.registerCommand("gut-extension.show_help", ()=>{
             this.showHelp();
         });
-    }   
-    
+    }
+
     /**
      * Get a gut-extension configuration paramter value.  If it does not exist
      * then log and return the default.
-     * 
+     *
      * @param name The name of the gut-extension config parameter to get
      * @param defaultValue The default value to be returned, the default default is undefined
      */
@@ -38,10 +38,10 @@ export class GutTools{
     }
 
     /**
-	 * Runs a command in a terminal with the specified name.  Depending on the 
-     * value of the discardTerminal setting this will either dispose of an 
+	 * Runs a command in a terminal with the specified name.  Depending on the
+     * value of the discardTerminal setting this will either dispose of an
      * existing terminal with that name and create a new or use the existing one.
-     * 
+     *
 	 * @param terminalName the name of the terminal to create or reuse
 	 * @param command the command to run in the terminal
 	 */
@@ -53,11 +53,11 @@ export class GutTools{
             terminal.dispose();
             terminal = undefined;
         }
-        
+
 		if (!terminal) {
 			terminal = vscode.window.createTerminal(terminalName);
         }
-        
+
 		terminal.sendText(command, true);
 		terminal.show();
 	}
@@ -86,7 +86,7 @@ export class GutTools{
      */
     private isActiveEditorFileValid(activeEditor:any):boolean{
         let toReturn = false;
-        
+
         if (activeEditor) {
             let path = this.getFilePath(activeEditor);
             if(path !==  ""){
@@ -95,23 +95,23 @@ export class GutTools{
                 }else{
                     vscode.window.showErrorMessage('Current file is not a GDScript file.');
                 }
-            }        
+            }
         }else{
             vscode.window.showErrorMessage("No file currently has focus.");
-        }        
+        }
         return toReturn;
     }
 
     /**
-     * Gets the symbol tree for the opened file.  This tree is created by the 
+     * Gets the symbol tree for the opened file.  This tree is created by the
      * Godot Tools Extension for .gd files.
-     * @param document 
+     * @param document
      */
     private async getSymbols(document: vscode.TextDocument): Promise<vscode.DocumentSymbol[]> {
         return await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
             'vscode.executeDocumentSymbolProvider', document.uri) || [];
     }
-    
+
     /**
      * Get the GUT option for the line number that is passed in.
      * @param docSymbols Symbols for the document
@@ -123,21 +123,21 @@ export class GutTools{
             opts += this.getOptionForSymbolInfo(val, line);
             opts += this.getOptionForLine(val.children, line);
         }
-        
+
         return opts;
     }
 
     /**
-     * The Godot extension will populate the DocumentSymbol, so this only 
+     * The Godot extension will populate the DocumentSymbol, so this only
      * works if the Editor has been launched for the workspace.
      */
     private getOptionForSymbolInfo(docSymbol:vscode.DocumentSymbol, line: number){
         let opt = "";
-            
+
         if(docSymbol.range.start.line <= line && docSymbol.range.end.line >= line){
-            // The Godot plugin uses Package for both the file and for inner
+            // The Godot plugin uses Class for both the file and for inner
             // classes.
-            if(docSymbol.kind === vscode.SymbolKind.Package){
+            if(docSymbol.kind === vscode.SymbolKind.Class){
                 if(docSymbol.name.endsWith('.gd')){
                     opt = this.optionSelectScript(docSymbol.name);
                 }else{
@@ -145,25 +145,25 @@ export class GutTools{
                 }
             }
 
-            // The Godot plugin uses Interface for methods.
-            if(docSymbol.kind === vscode.SymbolKind.Interface){
+            // The Godot plugin uses Method for methods.
+            if(docSymbol.kind === vscode.SymbolKind.Method){
                 let allLinesEmpty = true;
                 let curLineNum = line;
-                
-                // Ignore the blank space between methods.  Check all lines 
-                // from the current line to the end of the method to see if 
+
+                // Ignore the blank space between methods.  Check all lines
+                // from the current line to the end of the method to see if
                 // they are blank or comments.
                 while(allLinesEmpty && curLineNum <= docSymbol.range.end.line){
                     let lineText = vscode.window.activeTextEditor?.document.lineAt(curLineNum).text.trim();
                     if(lineText) {
                         allLinesEmpty = lineText === '' || lineText.startsWith('#');
-                    } 
+                    }
                     curLineNum += 1;
                 }
 
                 // When they are not all blank then we are in a method so add
                 // that to the options.  When they are all blank then we are in
-                // the space between two methods so don't add the options so 
+                // the space between two methods so don't add the options so
                 // that the Inner class or file is run.
                 if(!allLinesEmpty){
                     opt = this.optionUnitTestname(docSymbol.name);
@@ -172,9 +172,9 @@ export class GutTools{
         }
         return opt;
     }
-    
+
     /**
-     * Runs GUT for the current workspace.  Any other eninge options or GUT 
+     * Runs GUT for the current workspace.  Any other eninge options or GUT
      * options should be supplied through options parameter.
      * @param options other GUT or Godot options
      */
@@ -259,17 +259,17 @@ export class GutTools{
         }
 
         let activeEditor = vscode.window.activeTextEditor;
-        // Have to "&& activeEditor" or vscode thinks it hasn't been checked for 
+        // Have to "&& activeEditor" or vscode thinks it hasn't been checked for
         // undefined.  Must check it 2nd or we don't get all the error messages
         // out of isActiveEditorFileValid.
         if(this.isActiveEditorFileValid(activeEditor) && activeEditor){
             let doc = activeEditor.document;
             let line  = activeEditor.selection.active.line;
-            
-            let info = await this.getSymbols(doc);       
+
+            let info = await this.getSymbols(doc);
             if(info.length > 0){
                 let options = this.getOptionForLine(info, line);
-                this.runGut(options);        
+                this.runGut(options);
             }else{
                 vscode.window.showErrorMessage(
                     'Run at cursor requires the workspace to be open in the ' +

@@ -24,3 +24,11 @@ class TestBarClassTwo:
 
 	func test_pending():
 		pending('this test is pending')
+
+	func test_make_orphan():
+		var n = Node2D.new()
+		assert_true(true)
+
+	func test_with_yield():
+		yield(yield_for(1), YIELD)
+		assert_true(true)

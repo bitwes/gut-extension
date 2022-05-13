@@ -11,6 +11,7 @@ class GodotDebugConfiguration implements vscode.DebugConfiguration{
     public address = "127.0.0.1";
     public launch_game_instance = true;
     public launch_scene = false;
+    public additional_options = "";
 }
 
 export class GutTools{
@@ -41,6 +42,7 @@ export class GutTools{
 
     private runAllDebugger(){
         let config = new GodotDebugConfiguration();
+        config.additional_options = " -s \"res://addons/gut/gut_cmdln.gd\" ";
         vscode.debug.startDebugging(undefined, config);
     }
 

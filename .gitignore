@@ -2,5 +2,9 @@ node_modules
 out
 .DS_Store
 *.vsix
-GodotTestProject/addons/
-GodotTestProject/.import/
+GodotTestProject/Godot3/addons/
+GodotTestProject/Godot3/.import/
+
+GodotTestProject/Godot4/addons/
+GodotTestProject/Godot4/.import/
+GodotTestProject/Godot4/.godot/

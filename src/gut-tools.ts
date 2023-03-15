@@ -1,8 +1,10 @@
 import * as vscode from "vscode";
-import { CommandLineUtils } from "./utils";
+import * as utils from "./utils";
+import {CursorLocation, RunAtCursor} from "./cursor-location";
 
 export class GutTools{
-    private cmdUtils = new CommandLineUtils();
+    private cmdUtils = new utils.CommandLineUtils();
+    private cursorLoc = new CursorLocation();
 
 	constructor() {}
 
@@ -107,42 +109,61 @@ export class GutTools{
      * Godot Tools Extension for .gd files.
      * @param document
      */
-    private async getSymbols(document: vscode.TextDocument): Promise<vscode.DocumentSymbol[]> {
+    private async getSymbols(document: vscode.TextDocument): Promise<any[]> {
+        // The docs say that vscode.executeDocumentSymbolProvider returns a promise
+        // of DocumentSymbol and SymbolInformation instances.  IDK what the
+        // heck that means.  Is it both classes mashed into one?  Because that
+        // is what it looks like when you print it.  This method used to return
+        // and array of DocumentSymbol, but I want to use some of the
+        // SymbolInformation data, so I changed this to <any[]> and you can cast
+        // it to whatever you want...I guess.  Seems dumb but idk what else to
+        // do and I've run out of "learning stuff" energy.
         return await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
             'vscode.executeDocumentSymbolProvider', document.uri) || [];
     }
 
     /**
      * Get the GUT option for the line number that is passed in.
-     * @param docSymbols Symbols for the document
+     * @param docSymbols results of getSymbols...see that method cause idk what
+     *  it really is.
      * @param line  line number
      */
-    private getOptionForLine(docSymbols:vscode.DocumentSymbol[], line:number){
-        let opts = "";
-        for (let val of docSymbols) {
-            opts += this.getOptionForSymbolInfo(val, line);
-            opts += this.getOptionForLine(val.children, line);
-        }
-
-        return opts;
+    private getOptionForLine(docDatas:any[], line:number){
+        let rac = new RunAtCursor();
+        return rac.getOptionsForLine(docDatas, line);
+        // let opts = "";
+        // for (let val of docDatas) {
+        //     opts += this.getOptionForSymbolInfo(val, line);
+        //     opts += this.getOptionForLine(val.children, line);
+        // }
+        // return opts;
     }
 
     /**
      * The Godot extension will populate the DocumentSymbol, so this only
      * works if the Editor has been launched for the workspace.
      */
-    private getOptionForSymbolInfo(docSymbol:vscode.DocumentSymbol, line: number){
+    private getOptionForSymbolInfo(docData:any, line: number){
         let opt = "";
+
+        // Casting docData as the two things it could be...or is...or was, IDK.
+        // See getSymbols for more information on whatever dumb thing I'm doing
+        // here.
+        let docSymbol = docData as vscode.DocumentSymbol;
+        let docInfo = docData as vscode.SymbolInformation;
 
         if(docSymbol.range.start.line <= line && docSymbol.range.end.line >= line){
             // The Godot plugin uses Class for both the file and for inner
             // classes.
             if(docSymbol.kind === vscode.SymbolKind.Class){
                 if(docSymbol.name.endsWith('.gd')){
-                    opt = this.optionSelectScript(docSymbol.name);
+                    this.cursorLoc.setScriptName(docSymbol.name);
+                    // opt = this.optionSelectScript(docSymbol.name);
                 }else{
-                    opt = this.optionInnerClass(docSymbol.name);
+                    this.cursorLoc.pushInnerClass(docSymbol.name);
+                    // opt = this.optionInnerClass(docSymbol.name);
                 }
+
             }
 
             // The Godot plugin uses Method for methods.
@@ -154,6 +175,7 @@ export class GutTools{
                 // from the current line to the end of the method to see if
                 // they are blank or comments.
                 while(allLinesEmpty && curLineNum <= docSymbol.range.end.line){
+                    vscode.window.activeTextEditor?.document.lineAt
                     let lineText = vscode.window.activeTextEditor?.document.lineAt(curLineNum).text.trim();
                     if(lineText) {
                         allLinesEmpty = lineText === '' || lineText.startsWith('#');
@@ -166,7 +188,12 @@ export class GutTools{
                 // the space between two methods so don't add the options so
                 // that the Inner class or file is run.
                 if(!allLinesEmpty){
+                    this.cursorLoc.pushMethod(docSymbol.name);
                     opt = this.optionUnitTestname(docSymbol.name);
+                    if(!docInfo.containerName.endsWith('.gd')){
+                        this.cursorLoc.pushInnerClass(docInfo.containerName);
+                        opt += this.optionInnerClass(docInfo.containerName);
+                    }
                 }
             }
         }
@@ -266,10 +293,11 @@ export class GutTools{
             let doc = activeEditor.document;
             let line  = activeEditor.selection.active.line;
 
+            this.cursorLoc.clear();
             let info = await this.getSymbols(doc);
             if(info.length > 0){
-                let options = this.getOptionForLine(info, line);
-                this.runGut(options);
+                let opts = this.getOptionForLine(info, line);
+                this.runGut(opts);
             }else{
                 vscode.window.showErrorMessage(
                     'Run at cursor requires the workspace to be open in the ' +

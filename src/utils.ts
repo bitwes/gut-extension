@@ -1,9 +1,18 @@
 import * as vscode from "vscode";
 import * as fs from 'fs';
 
+
+function makePad(pad:string, times:number) : string{
+    var toReturn = '';
+    for (let i = 0; i < times; i++) {
+        toReturn += pad;
+    }
+    return toReturn;
+}
+
 export function printDocumentSymbol(docSymbol:vscode.DocumentSymbol,  indent : number = 0){
-    let pad = '  ';
-    let s = `${docSymbol.name}:  ${docSymbol.range.start.line} -> ${docSymbol.range.end.line} (${docSymbol.kind})`;
+    let pad = makePad('    ', indent);
+    let s = `${pad}${docSymbol.name}:  ${docSymbol.range.start.line} -> ${docSymbol.range.end.line} (${docSymbol.kind})`;
     console.log(s);
 }
 

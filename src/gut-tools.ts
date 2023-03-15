@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
 import * as utils from "./utils";
-import {CursorLocation, RunAtCursor} from "./cursor-location";
+import {CursorLocation, RunAtCursor} from "./run-at-cursor";
 
 export class GutTools{
     private cmdUtils = new utils.CommandLineUtils();
-    private cursorLoc = new CursorLocation();
+    private optionMaker = new utils.GutOptionMaker();
 
 	constructor() {}
 
@@ -122,83 +122,6 @@ export class GutTools{
             'vscode.executeDocumentSymbolProvider', document.uri) || [];
     }
 
-    /**
-     * Get the GUT option for the line number that is passed in.
-     * @param docSymbols results of getSymbols...see that method cause idk what
-     *  it really is.
-     * @param line  line number
-     */
-    private getOptionForLine(docDatas:any[], line:number){
-        let rac = new RunAtCursor();
-        return rac.getOptionsForLine(docDatas, line);
-        // let opts = "";
-        // for (let val of docDatas) {
-        //     opts += this.getOptionForSymbolInfo(val, line);
-        //     opts += this.getOptionForLine(val.children, line);
-        // }
-        // return opts;
-    }
-
-    /**
-     * The Godot extension will populate the DocumentSymbol, so this only
-     * works if the Editor has been launched for the workspace.
-     */
-    private getOptionForSymbolInfo(docData:any, line: number){
-        let opt = "";
-
-        // Casting docData as the two things it could be...or is...or was, IDK.
-        // See getSymbols for more information on whatever dumb thing I'm doing
-        // here.
-        let docSymbol = docData as vscode.DocumentSymbol;
-        let docInfo = docData as vscode.SymbolInformation;
-
-        if(docSymbol.range.start.line <= line && docSymbol.range.end.line >= line){
-            // The Godot plugin uses Class for both the file and for inner
-            // classes.
-            if(docSymbol.kind === vscode.SymbolKind.Class){
-                if(docSymbol.name.endsWith('.gd')){
-                    this.cursorLoc.setScriptName(docSymbol.name);
-                    // opt = this.optionSelectScript(docSymbol.name);
-                }else{
-                    this.cursorLoc.pushInnerClass(docSymbol.name);
-                    // opt = this.optionInnerClass(docSymbol.name);
-                }
-
-            }
-
-            // The Godot plugin uses Method for methods.
-            if(docSymbol.kind === vscode.SymbolKind.Method){
-                let allLinesEmpty = true;
-                let curLineNum = line;
-
-                // Ignore the blank space between methods.  Check all lines
-                // from the current line to the end of the method to see if
-                // they are blank or comments.
-                while(allLinesEmpty && curLineNum <= docSymbol.range.end.line){
-                    vscode.window.activeTextEditor?.document.lineAt
-                    let lineText = vscode.window.activeTextEditor?.document.lineAt(curLineNum).text.trim();
-                    if(lineText) {
-                        allLinesEmpty = lineText === '' || lineText.startsWith('#');
-                    }
-                    curLineNum += 1;
-                }
-
-                // When they are not all blank then we are in a method so add
-                // that to the options.  When they are all blank then we are in
-                // the space between two methods so don't add the options so
-                // that the Inner class or file is run.
-                if(!allLinesEmpty){
-                    this.cursorLoc.pushMethod(docSymbol.name);
-                    opt = this.optionUnitTestname(docSymbol.name);
-                    if(!docInfo.containerName.endsWith('.gd')){
-                        this.cursorLoc.pushInnerClass(docInfo.containerName);
-                        opt += this.optionInnerClass(docInfo.containerName);
-                    }
-                }
-            }
-        }
-        return opt;
-    }
 
     /**
      * Runs GUT for the current workspace.  Any other eninge options or GUT
@@ -225,34 +148,6 @@ export class GutTools{
     }
 
     /**
-     * Get the option to select a script based on the current platform.
-     * @param scriptPath the name of the script to run
-     */
-    private optionSelectScript(scriptPath:string):string{
-        return " -gselect=" + this.cmdUtils.wrapForPS(scriptPath);
-    }
-
-    /**
-     * Get the option to run an inner class based ont he current platform.
-     * @param clasName The inner class name
-     */
-    private optionInnerClass(clasName:string):string{
-        // technically this doesn't require "" since these class names can't
-        // have characters that need to be escaped for powershell, but who
-        // knows when that might change.
-        return " -ginner_class=" + this.cmdUtils.wrapForPS(clasName);
-    }
-
-    /**
-     * Get the option to run a test with the given name.
-     * @param testName The name of the test to run
-     */
-    private optionUnitTestname(testName:string):string{
-        // This is the same case as optionInnerClass, wrapping for good measure.
-        return " -gunit_test_name=" + this.cmdUtils.wrapForPS(testName);
-    }
-
-    /**
      * Runs the entire test suite.
      */
     private runAllTests(){
@@ -273,7 +168,7 @@ export class GutTools{
         const activeEditor = vscode.window.activeTextEditor;
         if(this.isActiveEditorFileValid(activeEditor)){
             let path = this.getFilePath(activeEditor);
-            this.runGut(this.optionSelectScript(path));
+            this.runGut(this.optionMaker.optionSelectScript(path));
         }
     }
 
@@ -293,12 +188,12 @@ export class GutTools{
             let doc = activeEditor.document;
             let line  = activeEditor.selection.active.line;
 
-            this.cursorLoc.clear();
             let info = await this.getSymbols(doc);
             if(info.length > 0){
-                let opts = this.getOptionForLine(info, line);
+                let rac = new RunAtCursor();
+                let opts = rac.getOptionsForLine(info, line);
                 this.runGut(opts);
-            }else{
+            } else {
                 vscode.window.showErrorMessage(
                     'Run at cursor requires the workspace to be open in the ' +
                     'Godot Editor');

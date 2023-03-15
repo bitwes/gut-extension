@@ -110,3 +110,36 @@ export class CommandLineUtils {
         return isValid;
     }
 }
+
+
+export class GutOptionMaker{
+    private cmdUtils = new CommandLineUtils();
+
+    /**
+     * Get the option to select a script based on the current platform.
+     * @param scriptPath the name of the script to run
+     */
+    public optionSelectScript(scriptPath:string):string{
+        return " -gselect=" + this.cmdUtils.wrapForPS(scriptPath);
+    }
+
+    /**
+     * Get the option to run an inner class based ont he current platform.
+     * @param clasName The inner class name
+     */
+    public optionInnerClass(clasName:string):string{
+        // technically this doesn't require "" since these class names can't
+        // have characters that need to be escaped for powershell, but who
+        // knows when that might change.
+        return " -ginner_class=" + this.cmdUtils.wrapForPS(clasName);
+    }
+
+    /**
+     * Get the option to run a test with the given name.
+     * @param testName The name of the test to run
+     */
+    public optionUnitTestname(testName:string):string{
+        // This is the same case as optionInnerClass, wrapping for good measure.
+        return " -gunit_test_name=" + this.cmdUtils.wrapForPS(testName);
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "compact_mode": true,
+    "config_file": "res://.gutconfig.json",
+    "dirs": [
+     "res://test/unit"
+    ],
+    "include_subdirs": true,
+    "hide_orphans": false,
+    "ignore_pause": false,
+
+    "log_level": 1,
+    "opacity": 100,
+    "paint_after": 0.1,
+    "should_exit": true,
+    "should_exit_on_success": false
+   }

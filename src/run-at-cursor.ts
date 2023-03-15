@@ -53,7 +53,53 @@ export class CursorLocation{
 
 
 
-
+/**
+ * This class gets the GUT options for a line number.  The DocumentSymbol array
+ * provided by the Godot plugin is different depending on the version of
+ * Godot.  In Godot 4 the data is incomplete or buggy.  The approach this class
+ * takes seems to work fine for both, but if it's not doing what you'd think it
+ * would, that's probably why.
+ *
+ * -------------------------------------------------------
+ * Godot 3 utils.printDocumenetSymbols for test_bar.gd
+ * -------------------------------------------------------
+ * test_bar.gd:  0 -> 50 (4)
+    SomeBaseTestClass:  2 -> 10 (4)
+        foo:  5 -> 9 (5)
+    TestBarClassOne:  10 -> 23 (4)
+        test_bar_one:  13 -> 15 (5)
+        test_bar_two:  16 -> 18 (5)
+        test_pending:  19 -> 22 (5)
+    TestBarClassTwo:  23 -> 36 (4)
+        test_bar_one:  26 -> 28 (5)
+        test_bar_two:  29 -> 31 (5)
+        test_pending:  32 -> 35 (5)
+    TestUsingBaseClass:  36 -> 45 (4)
+        test_one_thing:  39 -> 41 (5)
+        test_something_else:  42 -> 44 (5)
+    test_at_the_end_1:  45 -> 47 (5)
+    test_at_the_end_2:  48 -> 49 (5)
+ *
+ *
+ * -------------------------------------------------------
+ * Godot 4 utils.printDocumentSymbols for test_bar.gd
+ * It's all wrong, but usable.
+ * -------------------------------------------------------
+ * test_bar.gd:  0 -> 51 (4)
+    SomeBaseTestClass:  3 -> 51 (4)
+        foo:  5 -> 5 (5)
+        TestBarClassOne:  10 -> 51 (4)
+            test_bar_one:  12 -> 12 (5)
+            test_bar_two:  15 -> 15 (5)
+            test_pending:  18 -> 18 (5)
+            TestBarClassTwo:  23 -> 51 (4)
+                test_bar_one:  25 -> 25 (5)
+                test_bar_two:  28 -> 28 (5)
+                test_pending:  31 -> 31 (5)
+                TestUsingBaseClass:  36 -> 51 (4)
+                    test_one_thing:  38 -> 38 (5)
+ *
+ */
 export class RunAtCursor{
     private cursorLoc = new CursorLocation();
     private  curIndentSize = 0;

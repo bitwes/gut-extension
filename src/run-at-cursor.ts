@@ -37,13 +37,13 @@ export class CursorLocation{
 
     public getOptions() : string{
         let toReturn = '';
-        if(this.scriptName != this.NOT_SET){
+        if(this.scriptName !== this.NOT_SET){
             toReturn += this.optionMaker.optionSelectScript(this.scriptName);
         }
-        if(this.innerClassName != this.NOT_SET){
+        if(this.innerClassName !== this.NOT_SET){
             toReturn += this.optionMaker.optionInnerClass(this.innerClassName);
         }
-        if(this.testName != this.NOT_SET){
+        if(this.testName !== this.NOT_SET){
             toReturn += this.optionMaker.optionUnitTestname(this.testName);
         }
 

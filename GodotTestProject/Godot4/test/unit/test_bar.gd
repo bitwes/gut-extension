@@ -7,7 +7,6 @@ class SomeBaseTestClass:
 		return 'bar'
 
 
-
 class TestBarClassOne:
 	extends GutTest
 
@@ -42,6 +41,7 @@ class TestUsingBaseClass:
 
 	func test_something_else():
 		assert_ne('could not think of another', 'witty thing to type')
+
 
 func test_at_the_end_1():
 	assert_true(true)

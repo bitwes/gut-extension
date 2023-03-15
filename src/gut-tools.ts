@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as utils from "./utils";
-import {CursorLocation, RunAtCursor} from "./run-at-cursor";
+import {RunAtCursor} from "./run-at-cursor";
 
 export class GutTools{
     private cmdUtils = new utils.CommandLineUtils();

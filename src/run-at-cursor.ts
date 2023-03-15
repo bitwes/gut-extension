@@ -9,23 +9,23 @@ export class CursorLocation{
     private testName = this.NOT_SET;
     private optionMaker = new utils.GutOptionMaker();
 
-    public setScriptName(name:string){
+    public setScript(name:string){
         this.scriptName = name;
     }
 
-    public pushInnerClass(name:string){
+    public setInnerClass(name:string){
         this.innerClassName = name;
     }
 
-    public popInnerClass(){
+    public clearInnerClass(){
         this.innerClassName = this.NOT_SET;
     }
 
-    public pushMethod(name:string){
+    public setMethod(name:string){
         this.testName = name;
     }
 
-    public popMethod(){
+    public clearMethod(){
         this.testName = this.NOT_SET;
     }
 
@@ -58,6 +58,30 @@ export class RunAtCursor{
     private cursorLoc = new CursorLocation();
     private  curIndentSize = 0;
 
+    /**
+     * I don't think this will work with Godot 4 yet since the end-line for
+     * methods is the same as the start-line.
+     * @param docSymbol
+     * @param targetLine
+     */
+    private areAllLinesAboveEmpty(docSymbol:vscode.DocumentSymbol, targetLine:number) : boolean {
+        let allLinesEmpty = true;
+        let curLineNum = targetLine;
+
+        // Ignore the blank space between methods.  Check all lines
+        // from the current line to the end of the method to see if
+        // they are blank or comments.
+        while(allLinesEmpty && curLineNum <= docSymbol.range.end.line){
+            let lineText = vscode.window.activeTextEditor?.document.lineAt(curLineNum).text.trim();
+            if(lineText) {
+                allLinesEmpty = lineText === '' || lineText.startsWith('#');
+            }
+            curLineNum += 1;
+        }
+
+        return allLinesEmpty;
+    }
+
 
     private processDocSymbol(docData:any, targetLine:number){
         let docSymbol = docData as vscode.DocumentSymbol;
@@ -72,22 +96,31 @@ export class RunAtCursor{
         }
 
         if(newIndentSize < this.curIndentSize){
-            this.cursorLoc.popInnerClass();
+            this.cursorLoc.clearInnerClass();
         }
         this.curIndentSize = newIndentSize;
 
         if(docSymbol.kind === vscode.SymbolKind.Class){
-            this.cursorLoc.pushInnerClass(docSymbol.name);
-            this.cursorLoc.popMethod();
+            this.cursorLoc.setInnerClass(docSymbol.name);
+            this.cursorLoc.clearMethod();
         }else if(docSymbol.kind === vscode.SymbolKind.Method){
-            this.cursorLoc.pushMethod(docSymbol.name);
+            // In Godot 4, the start and end line for a method are the
+            // same, so we cannot use areAllLinesAboveEmpty to find the gap
+            // between tests.  If we try to, we never get a method.
+            if(docSymbol.range.start.line === docSymbol.range.end.line){
+                this.cursorLoc.setMethod(docSymbol.name);
+            } else {
+                if(!this.areAllLinesAboveEmpty(docSymbol, targetLine)){
+                    this.cursorLoc.setMethod(docSymbol.name);
+                }
+            }
         }
     }
 
 
     private traverseTree(docData:any[], targetLine:number) {
-
         let docIndex = 0;
+
         while(docIndex < docData.length && docData[docIndex].range.start.line <= targetLine){
             this.processDocSymbol(docData[docIndex], targetLine);
             this.traverseTree(docData[docIndex].children, targetLine);
@@ -102,7 +135,7 @@ export class RunAtCursor{
 
         if(docSymbols.length > 0) {
             if(docSymbols[0].kind === vscode.SymbolKind.Class && docSymbols[0].name.endsWith('.gd')){
-                this.cursorLoc.setScriptName(docSymbols[0].name);
+                this.cursorLoc.setScript(docSymbols[0].name);
                 this.curIndentSize = 0;
                 this.traverseTree(docSymbols[0].children, lineNumber);
             }

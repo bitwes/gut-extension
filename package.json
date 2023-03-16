@@ -3,6 +3,7 @@
 	"displayName": "gut-extension",
 	"description": "run gut",
 	"version": "2.1.0",
+	"icon": "images/icon.png",
 	"repository": "https://github.com/bitwes/gut-extension",
 	"publisher": "bitwes",
 	"engines": {

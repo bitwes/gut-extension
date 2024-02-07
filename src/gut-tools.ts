@@ -2,6 +2,19 @@ import * as vscode from "vscode";
 import * as utils from "./utils";
 import {RunAtCursor} from "./run-at-cursor";
 
+
+class GodotDebugConfiguration implements vscode.DebugConfiguration{
+    public type = "godot";
+    public name = "Debug Godot";
+    public request = "launch";
+    public project = "${workspaceFolder}";
+    public port = 6007;
+    public address = "127.0.0.1";
+    public launch_game_instance = true;
+    public launch_scene = false;
+    public additional_options = "";
+}
+
 export class GutTools{
     private cmdUtils = new utils.CommandLineUtils();
     private optionMaker = new utils.GutOptionMaker();
@@ -21,7 +34,21 @@ export class GutTools{
         vscode.commands.registerCommand("gut-extension.show_help", ()=>{
             this.showHelp();
         });
+
+
+        vscode.commands.registerCommand("gut-extension.run_all_debugger", ()=>{
+            this.runAllDebugger();
+        });
     }
+
+
+    private runAllDebugger(){
+        let config = new GodotDebugConfiguration();
+        config.additional_options = " -s \"res://addons/gut/gut_cmdln.gd\" ";
+        vscode.debug.startDebugging(undefined, config);
+    }
+
+
 
     /**
      * Get a gut-extension configuration paramter value.  If it does not exist
@@ -205,6 +232,11 @@ export class GutTools{
      * Shows GUT help in the terminal window.
      */
     private showHelp(){
-        this.runGut('-gh');
+        this.runGut('-gh --no-window');
     }
+
+
+    // private launchDebugger(){
+    //     GodotDebugSession;
+    // }
 }

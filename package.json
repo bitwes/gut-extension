@@ -33,6 +33,10 @@
 			{
 				"command": "gut-extension.show_help",
 				"title": "GUT: Show Help"
+			},
+			{
+				"command": "gut-extension.run_all_debugger",
+				"title": "GUT: Run All Debugger"
 			}
 		],
 		"configuration": {

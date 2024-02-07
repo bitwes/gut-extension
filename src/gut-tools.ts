@@ -39,15 +39,27 @@ export class GutTools{
         vscode.commands.registerCommand("gut-extension.run_all_debugger", ()=>{
             this.runAllDebugger();
         });
+        vscode.commands.registerCommand("gut-extension.run_script_debugger", ()=>{
+            this.runScriptDebugger();
+        });
+        vscode.commands.registerCommand("gut-extension.run_cursor_debugger", ()=>{
+            this.runAtCursorDebugger();
+        });
+
     }
 
 
     private runAllDebugger(){
-        let config = new GodotDebugConfiguration();
-        config.additional_options = " -s \"res://addons/gut/gut_cmdln.gd\" ";
-        vscode.debug.startDebugging(undefined, config);
+        this.runAllTests(true);
     }
 
+    private runScriptDebugger(){
+        this.runScript(true);
+    }
+
+    private async runAtCursorDebugger(){
+        this.runAtCursor(true);
+    }
 
 
     /**
@@ -164,6 +176,21 @@ export class GutTools{
         }
     }
 
+    private async runGutDebugger(options:string = ""){
+        let config = new GodotDebugConfiguration();
+        config.additional_options = " -s \"res://addons/gut/gut_cmdln.gd\" ";
+        config.additional_options += options;
+        vscode.debug.startDebugging(undefined, config);
+    }
+
+    private async runTests(options:string, useDebugger:boolean){
+        if(useDebugger){
+            await this.runGutDebugger(options);
+        } else {
+            await this.runGut(options);
+        }
+    }
+
     /**
      * Gets the path for the file open in the passed in Editor.
      * @param activeEditor The active editor's file path
@@ -177,17 +204,17 @@ export class GutTools{
     /**
      * Runs the entire test suite.
      */
-    private runAllTests(){
+    private runAllTests(useDebugger=false){
         if(!this.isGodotExtensionRunning()){
             return;
         }
-        this.runGut();
+        this.runTests("", useDebugger);
     }
 
     /**
      * Run the current script
      */
-    private runScript(){
+    private runScript(useDebugger=false){
         if(!this.isGodotExtensionRunning()){
             return;
         }
@@ -195,14 +222,14 @@ export class GutTools{
         const activeEditor = vscode.window.activeTextEditor;
         if(this.isActiveEditorFileValid(activeEditor)){
             let path = this.getFilePath(activeEditor);
-            this.runGut(this.optionMaker.optionSelectScript(path));
+            this.runTests(this.optionMaker.optionSelectScript(path), useDebugger);
         }
     }
 
     /**
      * Runs GUT for the currently focused file, inner class, and test method.
      */
-    private async runAtCursor(){
+    private async runAtCursor(useDebugger=false){
         if(!this.isGodotExtensionRunning()){
             return;
         }
@@ -219,7 +246,7 @@ export class GutTools{
             if(info.length > 0){
                 let rac = new RunAtCursor();
                 let opts = rac.getOptionsForLine(info, line);
-                this.runGut(opts);
+                this.runTests(opts, useDebugger);
             } else {
                 vscode.window.showErrorMessage(
                     'Run at cursor requires the workspace to be open in the ' +

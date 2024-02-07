@@ -36,7 +36,15 @@
 			},
 			{
 				"command": "gut-extension.run_all_debugger",
-				"title": "GUT: Run All Debugger"
+				"title": "GUT: Run All (debugger)"
+			},
+			{
+				"command": "gut-extension.run_script_debugger",
+				"title": "GUT: Run Current Script (debugger)"
+			},
+			{
+				"command": "gut-extension.run_cursor_debugger",
+				"title": "GUT: Run at Cursor (debugger)"
 			}
 		],
 		"configuration": {

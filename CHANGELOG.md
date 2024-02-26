@@ -2,7 +2,7 @@
 
 All notable changes to the "gut-extension" extension will be documented in this file.
 
-## 2.1.0
+## 2.2.0
 * Changes to work with godot-tools 2.0 extension
 * Dependency bumps.
 

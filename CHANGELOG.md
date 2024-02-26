@@ -1,6 +1,11 @@
 # Change Log
 
 All notable changes to the "gut-extension" extension will be documented in this file.
+
+## 2.2.0
+* Changes to work with godot-tools 2.0 extension
+* Dependency bumps.
+
 ## 2.0.0
 * Symbols used by Godot have changed which broke run-script and run-at-cursor.  This changes to the required version of Godot to 3.4 (maybe 3.3).
 * Bumped dependency versions.

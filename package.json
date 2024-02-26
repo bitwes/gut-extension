@@ -2,7 +2,7 @@
 	"name": "gut-extension",
 	"displayName": "gut-extension",
 	"description": "Run GUT TDD framework unit tests for Godot engine.",
-	"version": "2.2.0",
+	"version": "2.2.1",
 	"icon": "images/icon.png",
 	"repository": "https://github.com/bitwes/gut-extension",
 	"publisher": "bitwes",

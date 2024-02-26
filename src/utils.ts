@@ -23,6 +23,10 @@ export function printDocumentSymbols(docSymbols : vscode.DocumentSymbol[], inden
     });
 }
 
+export function getGodotConfigurationValue(name: string, defaultValue: any = null){
+    return vscode.workspace.getConfiguration("godotTools").get(name, defaultValue)||defaultValue;
+}
+
 /**
  */
 export class CommandLineUtils {

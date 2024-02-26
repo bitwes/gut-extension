@@ -12,7 +12,7 @@
  "hide_orphans": false,
  "ignore_pause": false,
  "include_subdirs": true,
- "inner_class": null,
+ "inner_class": "TestBarClassTwo",
  "junit_xml_file": "",
  "junit_xml_timestamp": false,
  "log_level": 1,
@@ -20,8 +20,8 @@
  "post_run_script": "",
  "pre_run_script": "",
  "prefix": "test_",
- "selected": null,
- "should_exit": false,
+ "selected": "test_bar.gd",
+ "should_exit": true,
  "should_exit_on_success": false,
  "should_maximize": false,
  "compact_mode": false,
@@ -38,6 +38,8 @@
   "hide_result_tree": false,
   "hide_output_text": false,
   "hide_settings": false,
-  "use_colors": false
+  "use_colors": false,
+  "output_font_name": "CourierPrime",
+  "output_font_size": 30
  }
 }

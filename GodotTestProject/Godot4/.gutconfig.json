@@ -1,5 +1,5 @@
 {
-    "compact_mode": true,
+    "compact_mode": false,
     "config_file": "res://.gutconfig.json",
     "dirs": [
      "res://test/unit"

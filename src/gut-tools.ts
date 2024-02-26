@@ -5,7 +5,7 @@ import {RunAtCursor} from "./run-at-cursor";
 
 class GodotDebugConfiguration implements vscode.DebugConfiguration{
     public type = "godot";
-    public name = "Debug Godot";
+    public name = "GUT Debugger";
     public request = "launch";
     public project = "${workspaceFolder}";
     public port = 6007;
@@ -13,7 +13,13 @@ class GodotDebugConfiguration implements vscode.DebugConfiguration{
     public launch_game_instance = true;
     public launch_scene = false;
     public additional_options = "";
+
+    public useGodotExtensionSettings(){
+        this.port = utils.getGodotConfigurationValue("lsp.serverPort", this.port);
+        this.address = utils.getGodotConfigurationValue("lsp.serverHost", this.address);
+    }
 }
+
 
 export class GutTools{
     private cmdUtils = new utils.CommandLineUtils();
@@ -177,8 +183,15 @@ export class GutTools{
     }
 
     private async runGutDebugger(options:string = ""){
+        var debuggerSearch : vscode.Uri[] = await vscode.workspace.findFiles("**/addons/gut/gut_vscode_debugger.gd");
+        var gutScript = "gut_cmdln.gd";
+        if(debuggerSearch.length === 1){
+            gutScript = "gut_vscode_debugger.gd";
+        }
+
         let config = new GodotDebugConfiguration();
-        config.additional_options = " -s \"res://addons/gut/gut_cmdln.gd\" ";
+        config.useGodotExtensionSettings();
+        config.additional_options = ` -s \"res://addons/gut/${gutScript}\" `;
         config.additional_options += options;
         vscode.debug.startDebugging(undefined, config);
     }
@@ -262,8 +275,4 @@ export class GutTools{
         this.runGut('-gh --no-window');
     }
 
-
-    // private launchDebugger(){
-    //     GodotDebugSession;
-    // }
 }

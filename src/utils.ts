@@ -24,16 +24,9 @@ export function printDocumentSymbols(docSymbols : vscode.DocumentSymbol[], inden
 }
 
 /**
- * This class contains logic from the godot_tools vscode extension.  This
- * should be deleted after the PR for new non-pallette commands is merged.
  */
 export class CommandLineUtils {
     private workspace_dir = vscode.workspace.rootPath;
-    private CONFIG_CONTAINER = "godot_tools";
-
-    private get_configuration(name: string, default_value: any = null) {
-        return vscode.workspace.getConfiguration(this.CONFIG_CONTAINER).get(name, default_value) || default_value;
-    }
 
     /**
      * Checks if the configured shell is powershell.exe or pwsh.exe
@@ -77,21 +70,24 @@ export class CommandLineUtils {
         return cmdEsc;
     }
 
+
     /**
      * Returns a string that can be used to launch Godot for the current
      * workspace.  This uses the editor_path setting.  If that value of that
      * setting cannot be found on the file system then undefined will be
      * returned and an error message will be displayed on the screen.
      */
-    public getRunGodotCommand(){
-        let editorPath = this.get_configuration("editor_path", "");
+    public async getRunGodotCommand() : Promise<string | undefined>{
+        let editorPath : string = await vscode.commands.executeCommand('godotTools.getGodotPath');
+        let toReturn : string | undefined = editorPath;
+
         if(this.verifyEditorPathSetting(editorPath)){
-            editorPath = editorPath.replace("${workspaceRoot}", this.workspace_dir);
-            editorPath = this.escapeCommand(editorPath);
+            toReturn = toReturn.replace("${workspaceRoot}", this.workspace_dir ? this.workspace_dir : "${workspaceRoot}");
+            toReturn = this.escapeCommand(toReturn);
         } else {
-            editorPath = undefined;
+            toReturn = undefined;
         }
-        return editorPath;
+        return toReturn;
     }
 
     /**
@@ -103,7 +99,7 @@ export class CommandLineUtils {
     private verifyEditorPathSetting(editorPath:string){
         let isValid = false;
         if (!fs.existsSync(editorPath) || !fs.statSync(editorPath).isFile()) {
-            vscode.window.showErrorMessage(`Could not find ${editorPath}.  Please verify that the Godot_tools:Editor_path setting has a proper value.`);
+            vscode.window.showErrorMessage(`Could not find Godot at:  [${editorPath}].  Please verify that the godot-tools extension is configured.`);
         } else {
             isValid = true;
         }

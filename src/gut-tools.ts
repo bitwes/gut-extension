@@ -128,8 +128,8 @@ export class GutTools{
      * options should be supplied through options parameter.
      * @param options other GUT or Godot options
      */
-    private runGut(options:string = ''){
-        let cmd = this.cmdUtils.getRunGodotCommand();
+    private async runGut(options:string = ''){
+        let cmd = await this.cmdUtils.getRunGodotCommand();
         let configOpts = this.getGutExtensionSetting('additionalOptions', '');
         cmd += ' -s res://addons/gut/gut_cmdln.gd ';
         if(cmd){

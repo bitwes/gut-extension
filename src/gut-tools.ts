@@ -23,7 +23,6 @@ class GodotDebugConfiguration implements vscode.DebugConfiguration{
 
 
 export class GutTools{
-    private cmdUtils = new utils.CommandLineUtils();
     private gutTerminal : GutTerminal = new GutTerminal("GutTests");
 
 	constructor() {}

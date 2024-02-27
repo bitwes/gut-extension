@@ -8,9 +8,9 @@
     "hide_orphans": false,
     "ignore_pause": false,
 
-    "log_level": 1,
+    "log_level": 3,
     "opacity": 100,
     "paint_after": 0.1,
-    "should_exit": true,
+    "should_exit": false,
     "should_exit_on_success": false
    }

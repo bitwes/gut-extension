@@ -2,6 +2,25 @@ import * as vscode from "vscode";
 import * as utils from "./utils";
 import {RunAtCursor} from "./run-at-cursor";
 
+
+class GodotDebugConfiguration implements vscode.DebugConfiguration{
+    public type = "godot";
+    public name = "GUT Debugger";
+    public request = "launch";
+    public project = "${workspaceFolder}";
+    public port = 6007;
+    public address = "127.0.0.1";
+    public launch_game_instance = true;
+    public launch_scene = false;
+    public additional_options = "";
+
+    public useGodotExtensionSettings(){
+        this.port = utils.getGodotConfigurationValue("lsp.serverPort", this.port);
+        this.address = utils.getGodotConfigurationValue("lsp.serverHost", this.address);
+    }
+}
+
+
 export class GutTools{
     private cmdUtils = new utils.CommandLineUtils();
     private optionMaker = new utils.GutOptionMaker();
@@ -21,7 +40,33 @@ export class GutTools{
         vscode.commands.registerCommand("gut-extension.show_help", ()=>{
             this.showHelp();
         });
+
+
+        vscode.commands.registerCommand("gut-extension.run_all_debugger", ()=>{
+            this.runAllDebugger();
+        });
+        vscode.commands.registerCommand("gut-extension.run_script_debugger", ()=>{
+            this.runScriptDebugger();
+        });
+        vscode.commands.registerCommand("gut-extension.run_cursor_debugger", ()=>{
+            this.runAtCursorDebugger();
+        });
+
     }
+
+
+    private runAllDebugger(){
+        this.runAllTests(true);
+    }
+
+    private runScriptDebugger(){
+        this.runScript(true);
+    }
+
+    private async runAtCursorDebugger(){
+        this.runAtCursor(true);
+    }
+
 
     /**
      * Get a gut-extension configuration paramter value.  If it does not exist
@@ -137,6 +182,28 @@ export class GutTools{
         }
     }
 
+    private async runGutDebugger(options:string = ""){
+        var debuggerSearch : vscode.Uri[] = await vscode.workspace.findFiles("**/addons/gut/gut_vscode_debugger.gd");
+        var gutScript = "gut_cmdln.gd";
+        if(debuggerSearch.length === 1){
+            gutScript = "gut_vscode_debugger.gd";
+        }
+
+        let config = new GodotDebugConfiguration();
+        config.useGodotExtensionSettings();
+        config.additional_options = ` -s \"res://addons/gut/${gutScript}\" `;
+        config.additional_options += options;
+        vscode.debug.startDebugging(undefined, config);
+    }
+
+    private async runTests(options:string, useDebugger:boolean){
+        if(useDebugger){
+            await this.runGutDebugger(options);
+        } else {
+            await this.runGut(options);
+        }
+    }
+
     /**
      * Gets the path for the file open in the passed in Editor.
      * @param activeEditor The active editor's file path
@@ -150,17 +217,17 @@ export class GutTools{
     /**
      * Runs the entire test suite.
      */
-    private runAllTests(){
+    private runAllTests(useDebugger=false){
         if(!this.isGodotExtensionRunning()){
             return;
         }
-        this.runGut();
+        this.runTests("", useDebugger);
     }
 
     /**
      * Run the current script
      */
-    private runScript(){
+    private runScript(useDebugger=false){
         if(!this.isGodotExtensionRunning()){
             return;
         }
@@ -168,14 +235,14 @@ export class GutTools{
         const activeEditor = vscode.window.activeTextEditor;
         if(this.isActiveEditorFileValid(activeEditor)){
             let path = this.getFilePath(activeEditor);
-            this.runGut(this.optionMaker.optionSelectScript(path));
+            this.runTests(this.optionMaker.optionSelectScript(path), useDebugger);
         }
     }
 
     /**
      * Runs GUT for the currently focused file, inner class, and test method.
      */
-    private async runAtCursor(){
+    private async runAtCursor(useDebugger=false){
         if(!this.isGodotExtensionRunning()){
             return;
         }
@@ -192,7 +259,7 @@ export class GutTools{
             if(info.length > 0){
                 let rac = new RunAtCursor();
                 let opts = rac.getOptionsForLine(info, line);
-                this.runGut(opts);
+                this.runTests(opts, useDebugger);
             } else {
                 vscode.window.showErrorMessage(
                     'Run at cursor requires the workspace to be open in the ' +
@@ -205,6 +272,7 @@ export class GutTools{
      * Shows GUT help in the terminal window.
      */
     private showHelp(){
-        this.runGut('-gh');
+        this.runGut('-gh --no-window');
     }
+
 }

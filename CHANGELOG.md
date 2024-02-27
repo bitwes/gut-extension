@@ -2,6 +2,9 @@
 
 All notable changes to the "gut-extension" extension will be documented in this file.
 
+## 2.2.1
+* Debugger support.  "debugger" versions of all run commands have been added.
+
 ## 2.2.0
 * Changes to work with godot-tools 2.0 extension
 * Dependency bumps.

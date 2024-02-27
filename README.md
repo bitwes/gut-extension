@@ -9,12 +9,18 @@ Tools to run your [GUT framework](https://github.com/bitwes/Gut/) unit/integrati
 * `GUT: Show Help` - Displays the GUT command line help in the terminal window.
 * `GUT: Run All` - Runs the entire test suite.
 * `GUT: Run Current Script` - Runs the current test script.
-* `GUT: Run at Cursor` - Runs the current script and adds additional options based on where the cursor is located.  You can use this command to run a single test, an inner class, or the entire current file.  In Godot 3, if the cursor is between methods then the current inner class or file will be ran.<br/><br/>
+* `GUT: Run at Cursor` - Runs the current script and adds additional options based on where the cursor is located.  You can use this command to run a
+    * Single test
+    * An inner class
+    * Current file.
+    * In Godot 3, if the cursor is between methods then the current inner class or file will be ran.
+* All "Run" commands also have a "(debugger)" version that will use the debugger instead of the command line.
+<br/><br/>
 __NOTE:__ `Run at Cursor` uses features provided by the Godot Tools extension that are only available when the current workspace is open in the Godot editor.  There is a short delay when first launching the editor where this command will not work.  Just wait a few seconds and try again.
 
 # Setup
 ## Godot Tools
-This extension requires the Godot Tools extension and requires that the `Godot_tools: Editor_path` setting is configured properly to point to the Godot Engine executable.
+This extension requires the Godot Tools extension and requires that the path settings for Godot 3 and Godot 4 are configured properly to point to the Godot Engine executables.
 
 ## GUT
 This extension will only be active if the open workspace contains the GUT Godot plugin (`res://addons/gut/`).

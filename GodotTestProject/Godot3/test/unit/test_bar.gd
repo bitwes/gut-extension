@@ -7,7 +7,6 @@ class SomeBaseTestClass:
 		return 'bar'
 
 
-
 class TestBarClassOne:
 	extends GutTest
 

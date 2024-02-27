@@ -1,8 +1,8 @@
 {
 	"name": "gut-extension",
 	"displayName": "gut-extension",
-	"description": "run gut",
-	"version": "2.2.0",
+	"description": "Run GUT(Godot Unit Test) tests from VSCode.",
+	"version": "2.2.1",
 	"icon": "images/icon.png",
 	"repository": "https://github.com/bitwes/gut-extension",
 	"publisher": "bitwes",
@@ -33,6 +33,18 @@
 			{
 				"command": "gut-extension.show_help",
 				"title": "GUT: Show Help"
+			},
+			{
+				"command": "gut-extension.run_all_debugger",
+				"title": "GUT: Run All (debugger)"
+			},
+			{
+				"command": "gut-extension.run_script_debugger",
+				"title": "GUT: Run Current Script (debugger)"
+			},
+			{
+				"command": "gut-extension.run_cursor_debugger",
+				"title": "GUT: Run at Cursor (debugger)"
 			}
 		],
 		"configuration": {

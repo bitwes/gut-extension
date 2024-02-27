@@ -10,11 +10,13 @@ function makePad(pad:string, times:number) : string{
     return toReturn;
 }
 
+
 export function printDocumentSymbol(docSymbol:vscode.DocumentSymbol,  indent : number = 0){
     let pad = makePad('    ', indent);
     let s = `${pad}${docSymbol.name}:  ${docSymbol.range.start.line} -> ${docSymbol.range.end.line} (${docSymbol.kind})`;
     console.log(s);
 }
+
 
 export function printDocumentSymbols(docSymbols : vscode.DocumentSymbol[], indent : number =  0){
     docSymbols.forEach((val) =>  {
@@ -23,10 +25,15 @@ export function printDocumentSymbols(docSymbols : vscode.DocumentSymbol[], inden
     });
 }
 
+
+export function getGodotConfigurationValue(name: string, defaultValue: any = null){
+    return vscode.workspace.getConfiguration("godotTools").get(name, defaultValue)||defaultValue;
+}
+
+
 /**
  */
 export class CommandLineUtils {
-    private workspace_dir = vscode.workspace.rootPath;
 
     /**
      * Checks if the configured shell is powershell.exe or pwsh.exe
@@ -82,13 +89,13 @@ export class CommandLineUtils {
         let toReturn : string | undefined = editorPath;
 
         if(this.verifyEditorPathSetting(editorPath)){
-            toReturn = toReturn.replace("${workspaceRoot}", this.workspace_dir ? this.workspace_dir : "${workspaceRoot}");
             toReturn = this.escapeCommand(toReturn);
         } else {
             toReturn = undefined;
         }
         return toReturn;
     }
+
 
     /**
      * Verifies that the path passed in exists.  If it does not then an error
@@ -119,6 +126,7 @@ export class GutOptionMaker{
         return " -gselect=" + this.cmdUtils.wrapForPS(scriptPath);
     }
 
+
     /**
      * Get the option to run an inner class based ont he current platform.
      * @param clasName The inner class name
@@ -129,6 +137,7 @@ export class GutOptionMaker{
         // knows when that might change.
         return " -ginner_class=" + this.cmdUtils.wrapForPS(clasName);
     }
+
 
     /**
      * Get the option to run a test with the given name.

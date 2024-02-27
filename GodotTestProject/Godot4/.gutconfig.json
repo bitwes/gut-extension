@@ -1,5 +1,5 @@
 {
-    "compact_mode": true,
+    "compact_mode": false,
     "config_file": "res://.gutconfig.json",
     "dirs": [
      "res://test/unit"
@@ -11,6 +11,6 @@
     "log_level": 1,
     "opacity": 100,
     "paint_after": 0.1,
-    "should_exit": true,
+    "should_exit": false,
     "should_exit_on_success": false
    }

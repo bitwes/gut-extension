@@ -1,29 +1,55 @@
 import * as vscode from "vscode";
 import * as utils from "./utils";
+import * as fs from 'fs';
+
 /**
  *
  */
 export class GutTerminal {
     private terminal : vscode.Terminal | undefined = undefined;
+    private name = "gut";
+
+    constructor(name:string){
+        this.name = name;
+    }
+
+    private verifyEditorPathSetting(editorPath:string){
+        let isValid = false;
+        if (!fs.existsSync(editorPath) || !fs.statSync(editorPath).isFile()) {
+            vscode.window.showErrorMessage(`Could not find Godot at:  [${editorPath}].  Please verify that the godot-tools extension is configured.`);
+        } else {
+            isValid = true;
+        }
+        return isValid;
+    }
 
 
-    public refreshTerminal(terminalName:string){
-        let terminal = vscode.window.terminals.find(t => t.name === terminalName);
+    public refreshTerminal(){
+        this.terminal = vscode.window.terminals.find(t => t.name === this.name);
         let shouldDiscard = utils.getGutExtensionSetting('discardTerminal', true);
 
-        if(shouldDiscard && terminal){
-            terminal.dispose();
-            terminal = undefined;
+        if(shouldDiscard && this.terminal){
+            this.terminal.dispose();
+            this.terminal = undefined;
         }
 
         let terminalType : string = utils.getGutExtensionSetting("terminal", undefined) as string;
-		if (!terminal) {
+		if (!this.terminal) {
             if(terminalType !== "" && terminalType !== undefined){
-                terminal = vscode.window.createTerminal(terminalName, terminalType);
+                this.terminal = vscode.window.createTerminal(this.name, terminalType);
             } else {
-                terminal = vscode.window.createTerminal(terminalName);
+                this.terminal = vscode.window.createTerminal(this.name);
             }
         }
+    }
+
+
+    public escapeCommand(command:string):string{
+        let cmdEsc = `"${command}"`;
+        if(this.isShellPowershell()){
+            cmdEsc = `&${cmdEsc}`;
+        }
+        return cmdEsc;
     }
 
 
@@ -60,10 +86,24 @@ export class GutTerminal {
     }
 
 
+    public async getRunGodotCommand() : Promise<string | undefined>{
+        let editorPath : string = await vscode.commands.executeCommand('godotTools.getGodotPath');
+        let toReturn : string | undefined = editorPath;
+
+        if(this.verifyEditorPathSetting(editorPath)){
+            toReturn = this.escapeCommand(toReturn);
+        } else {
+            toReturn = undefined;
+        }
+        return toReturn;
+    }
+
+
     public gutOption(option:string, value:string):string{
         let opt = ` -${option}=${this.wrapForPS(value)}`;
         return opt;
     }
+
 
     public optionSelectScript(scriptPath:string):string{
         return this.gutOption("gselect", scriptPath);

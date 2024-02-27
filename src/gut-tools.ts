@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import * as utils from "./utils";
 import {RunAtCursor} from "./run-at-cursor";
+import { GutTerminal } from "./gut-terminal";
 
 
 class GodotDebugConfiguration implements vscode.DebugConfiguration{
@@ -23,7 +24,7 @@ class GodotDebugConfiguration implements vscode.DebugConfiguration{
 
 export class GutTools{
     private cmdUtils = new utils.CommandLineUtils();
-    private optionMaker = new utils.GutOptionMaker();
+    private gutTerminal : GutTerminal = new GutTerminal("GutTests");
 
 	constructor() {}
 
@@ -76,27 +77,27 @@ export class GutTools{
 	 * @param terminalName the name of the terminal to create or reuse
 	 * @param command the command to run in the terminal
 	 */
-	private reuseTerminal(terminalName:string, command:string){
-        let terminal = vscode.window.terminals.find(t => t.name === terminalName);
-        let shouldDiscard = utils.getGutExtensionSetting('discardTerminal', true);
+	// private reuseTerminal(terminalName:string, command:string){
+    //     let terminal = vscode.window.terminals.find(t => t.name === terminalName);
+    //     let shouldDiscard = utils.getGutExtensionSetting('discardTerminal', true);
 
-        if(shouldDiscard && terminal){
-            terminal.dispose();
-            terminal = undefined;
-        }
+    //     if(shouldDiscard && terminal){
+    //         terminal.dispose();
+    //         terminal = undefined;
+    //     }
 
-        let terminalType : string = utils.getGutExtensionSetting("terminal", undefined) as string;
-		if (!terminal) {
-            if(terminalType !== "" && terminalType !== undefined){
-                terminal = vscode.window.createTerminal(terminalName, terminalType);
-            } else {
-                terminal = vscode.window.createTerminal(terminalName);
-            }
-        }
+    //     let terminalType : string = utils.getGutExtensionSetting("terminal", undefined) as string;
+	// 	if (!terminal) {
+    //         if(terminalType !== "" && terminalType !== undefined){
+    //             terminal = vscode.window.createTerminal(terminalName, terminalType);
+    //         } else {
+    //             terminal = vscode.window.createTerminal(terminalName);
+    //         }
+    //     }
 
-		terminal.sendText(command, true);
-		terminal.show();
-	}
+	// 	terminal.sendText(command, true);
+	// 	terminal.show();
+	// }
 
     /**
      * Double checks that the Godot extension is running.
@@ -163,11 +164,12 @@ export class GutTools{
      * @param options other GUT or Godot options
      */
     private async runGut(options:string = ''){
-        let cmd = await this.cmdUtils.getRunGodotCommand();
+        let cmd = await this.gutTerminal.getRunGodotCommand();
         let configOpts = utils.getGutExtensionSetting('additionalOptions', '');
         cmd += ' -s res://addons/gut/gut_cmdln.gd ';
         if(cmd){
-            this.reuseTerminal('GutToolsTest', `${cmd} ${configOpts} ${options}`);
+            this.gutTerminal.runCommand(`${cmd} ${configOpts} ${options}`);
+            // this.reuseTerminal('GutToolsTest', `${cmd} ${configOpts} ${options}`);
         }
     }
 
@@ -210,6 +212,8 @@ export class GutTools{
         if(!this.isGodotExtensionRunning()){
             return;
         }
+
+        this.gutTerminal.refreshTerminal();
         this.runTests("", useDebugger);
     }
 
@@ -221,10 +225,11 @@ export class GutTools{
             return;
         }
 
+        this.gutTerminal.refreshTerminal();
         const activeEditor = vscode.window.activeTextEditor;
         if(this.isActiveEditorFileValid(activeEditor)){
             let path = this.getFilePath(activeEditor);
-            this.runTests(this.optionMaker.optionSelectScript(path), useDebugger);
+            this.runTests(this.gutTerminal.optionSelectScript(path), useDebugger);
         }
     }
 
@@ -236,6 +241,7 @@ export class GutTools{
             return;
         }
 
+        this.gutTerminal.refreshTerminal();
         let activeEditor = vscode.window.activeTextEditor;
         // Have to "&& activeEditor" or vscode thinks it hasn't been checked for
         // undefined.  Must check it 2nd or we don't get all the error messages
@@ -247,7 +253,7 @@ export class GutTools{
             let info = await this.getSymbols(doc);
             if(info.length > 0){
                 let rac = new RunAtCursor();
-                let opts = rac.getOptionsForLine(info, line);
+                let opts = rac.getOptionsForLine(this.gutTerminal, info, line);
                 this.runTests(opts, useDebugger);
             } else {
                 vscode.window.showErrorMessage(
@@ -261,7 +267,8 @@ export class GutTools{
      * Shows GUT help in the terminal window.
      */
     private showHelp(){
-        this.runGut('-gh --no-window');
+        this.gutTerminal.refreshTerminal();
+        this.runGut('-gh');
     }
 
 }

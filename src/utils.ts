@@ -32,7 +32,7 @@ export function printDocumentSymbols(docSymbols : vscode.DocumentSymbol[], inden
  * @param name The name of the gut-extension config parameter to get
  * @param defaultValue The default value to be returned, the default default is undefined
  */
-export function getGutExtensionSetting(name:string, defaultValue:any = undefined){
+export function getGutExtensionSetting(name:string, defaultValue:any = undefined) : any{
     let value = vscode.workspace.getConfiguration('gut-extension').get(name);
     if(value === undefined){
         console.log(`Missing config for:  gut-extension.${name}`);
@@ -129,10 +129,6 @@ export class CommandLineUtils {
         return toReturn;
     }
 
-
-    public runInTerminal(terminalName:string, command:string){
-
-    }
 }
 
 

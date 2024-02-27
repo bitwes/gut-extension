@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as utils from "./utils";
+import { GutTerminal } from "./gut-terminal";
 
 
 export class CursorLocation{
@@ -7,7 +8,6 @@ export class CursorLocation{
     private scriptName = this.NOT_SET;
     private innerClassName = this.NOT_SET;
     private testName = this.NOT_SET;
-    private optionMaker = new utils.GutOptionMaker();
 
     public setScript(name:string){
         this.scriptName = name;
@@ -35,16 +35,16 @@ export class CursorLocation{
         this.testName = this.NOT_SET;
     }
 
-    public getOptions() : string{
+    public getOptions(gutTerminal : GutTerminal) : string{
         let toReturn = '';
         if(this.scriptName !== this.NOT_SET){
-            toReturn += this.optionMaker.optionSelectScript(this.scriptName);
+            toReturn += gutTerminal.optionSelectScript(this.scriptName);
         }
         if(this.innerClassName !== this.NOT_SET){
-            toReturn += this.optionMaker.optionInnerClass(this.innerClassName);
+            toReturn += gutTerminal.optionInnerClass(this.innerClassName);
         }
         if(this.testName !== this.NOT_SET){
-            toReturn += this.optionMaker.optionUnitTestname(this.testName);
+            toReturn += gutTerminal.optionUnitTestname(this.testName);
         }
 
         return toReturn;
@@ -175,7 +175,7 @@ export class RunAtCursor{
     }
 
 
-    public getOptionsForLine(docData:any[], lineNumber:number) : string {
+    public getOptionsForLine(gutTerminal:GutTerminal, docData:any[], lineNumber:number) : string {
         this.cursorLoc.clear();
         let docSymbols = docData as vscode.DocumentSymbol[];
 
@@ -187,6 +187,6 @@ export class RunAtCursor{
             }
         }
 
-        return this.cursorLoc.getOptions();
+        return this.cursorLoc.getOptions(gutTerminal);
     }
 }

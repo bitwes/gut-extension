@@ -25,6 +25,22 @@ export function printDocumentSymbols(docSymbols : vscode.DocumentSymbol[], inden
     });
 }
 
+/**
+ * Get a gut-extension configuration paramter value.  If it does not exist
+ * then log and return the default.
+ *
+ * @param name The name of the gut-extension config parameter to get
+ * @param defaultValue The default value to be returned, the default default is undefined
+ */
+export function getGutExtensionSetting(name:string, defaultValue:any = undefined){
+    let value = vscode.workspace.getConfiguration('gut-extension').get(name);
+    if(value === undefined){
+        console.log(`Missing config for:  gut-extension.${name}`);
+        value = defaultValue;
+    }
+    return value;
+}
+
 
 export function getGodotConfigurationValue(name: string, defaultValue: any = null){
     return vscode.workspace.getConfiguration("godotTools").get(name, defaultValue)||defaultValue;
@@ -53,18 +69,6 @@ export class CommandLineUtils {
     }
 
     /**
-     * Wraps the value with double quotes if the terminal being used is Powershell.
-     * @param value the value to be wrapped
-     */
-    public wrapForPS(value:string) : string{
-        let wrapped = value;
-        if(this.isShellPowershell()){
-            wrapped = `"${wrapped}"`;
-        }
-        return wrapped;
-    }
-
-    /**
      * Wraps the command with double quotes and prepends a & when the current
      * shell is powershell.
      * @param cmd a command
@@ -75,6 +79,35 @@ export class CommandLineUtils {
             cmdEsc = `&${cmdEsc}`;
         }
         return cmdEsc;
+    }
+
+    /**
+     * Verifies that the path passed in exists.  If it does not then an error
+     * message will be displayed and false will be returned.  Otherwise true
+     * will be returned.
+     * @param editorPath The path to the godot executable
+     */
+    private verifyEditorPathSetting(editorPath:string){
+        let isValid = false;
+        if (!fs.existsSync(editorPath) || !fs.statSync(editorPath).isFile()) {
+            vscode.window.showErrorMessage(`Could not find Godot at:  [${editorPath}].  Please verify that the godot-tools extension is configured.`);
+        } else {
+            isValid = true;
+        }
+        return isValid;
+    }
+
+
+    /**
+     * Wraps the value with double quotes if the terminal being used is Powershell.
+     * @param value the value to be wrapped
+     */
+    public wrapForPS(value:string) : string{
+        let wrapped = value;
+        if(this.isShellPowershell()){
+            wrapped = `"${wrapped}"`;
+        }
+        return wrapped;
     }
 
 
@@ -97,20 +130,8 @@ export class CommandLineUtils {
     }
 
 
-    /**
-     * Verifies that the path passed in exists.  If it does not then an error
-     * message will be displayed and false will be returned.  Otherwise true
-     * will be returned.
-     * @param editorPath The path to the godot executable
-     */
-    private verifyEditorPathSetting(editorPath:string){
-        let isValid = false;
-        if (!fs.existsSync(editorPath) || !fs.statSync(editorPath).isFile()) {
-            vscode.window.showErrorMessage(`Could not find Godot at:  [${editorPath}].  Please verify that the godot-tools extension is configured.`);
-        } else {
-            isValid = true;
-        }
-        return isValid;
+    public runInTerminal(terminalName:string, command:string){
+
     }
 }
 

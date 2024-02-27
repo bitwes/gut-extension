@@ -101,8 +101,13 @@ export class GutTools{
             terminal = undefined;
         }
 
+        let terminalType : string = this.getGutExtensionSetting("terminal", undefined) as string;
 		if (!terminal) {
-			terminal = vscode.window.createTerminal(terminalName);
+            if(terminalType !== "" && terminalType !== undefined){
+                terminal = vscode.window.createTerminal(terminalName, terminalType);
+            } else {
+                terminal = vscode.window.createTerminal(terminalName);
+            }
         }
 
 		terminal.sendText(command, true);

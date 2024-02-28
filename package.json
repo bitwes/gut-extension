@@ -60,10 +60,10 @@
 					"default": true,
 					"description": "Subsequent launches of GUT will discard the existing terminal window and create a new one.  When not checked you must kill Godot manually if an error occurs."
 				},
-				"gut-extension.terminal": {
+				"gut-extension.shell": {
 					"type": "string",
 					"default": "",
-					"description": "The shell to use when running GUT.  Leave blank to use the default shell."
+					"description": "The shell to use when running GUT.  Leave blank to use the default shell.  Does not affect running through debugger."
 				}
 			}
 		}

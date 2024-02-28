@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import * as utils from "./utils";
 import { GutTerminal } from "./gut-terminal";
 
 

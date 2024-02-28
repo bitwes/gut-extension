@@ -28,75 +28,31 @@ export class GutTools{
 	constructor() {}
 
     public activate() {
-        vscode.commands.registerCommand("gut-extension.run_cursor", ()=>{
-            this.runAtCursor();
+        vscode.commands.registerCommand("gut-extension.show_help", ()=>{
+            this.showHelp();
         });
+
         vscode.commands.registerCommand("gut-extension.run_all", ()=>{
             this.runAllTests();
         });
         vscode.commands.registerCommand("gut-extension.run_script", ()=>{
             this.runScript();
         });
-        vscode.commands.registerCommand("gut-extension.show_help", ()=>{
-            this.showHelp();
+        vscode.commands.registerCommand("gut-extension.run_cursor", ()=>{
+            this.runAtCursor();
         });
-
 
         vscode.commands.registerCommand("gut-extension.run_all_debugger", ()=>{
-            this.runAllDebugger();
+            this.runAllTests(true);
         });
         vscode.commands.registerCommand("gut-extension.run_script_debugger", ()=>{
-            this.runScriptDebugger();
+            this.runScript(true);
         });
         vscode.commands.registerCommand("gut-extension.run_cursor_debugger", ()=>{
-            this.runAtCursorDebugger();
+            this.runAtCursor(true);
         });
-
     }
 
-
-    private runAllDebugger(){
-        this.runAllTests(true);
-    }
-
-    private runScriptDebugger(){
-        this.runScript(true);
-    }
-
-    private async runAtCursorDebugger(){
-        this.runAtCursor(true);
-    }
-
-
-    /**
-	 * Runs a command in a terminal with the specified name.  Depending on the
-     * value of the discardTerminal setting this will either dispose of an
-     * existing terminal with that name and create a new or use the existing one.
-     *
-	 * @param terminalName the name of the terminal to create or reuse
-	 * @param command the command to run in the terminal
-	 */
-	// private reuseTerminal(terminalName:string, command:string){
-    //     let terminal = vscode.window.terminals.find(t => t.name === terminalName);
-    //     let shouldDiscard = utils.getGutExtensionSetting('discardTerminal', true);
-
-    //     if(shouldDiscard && terminal){
-    //         terminal.dispose();
-    //         terminal = undefined;
-    //     }
-
-    //     let terminalType : string = utils.getGutExtensionSetting("terminal", undefined) as string;
-	// 	if (!terminal) {
-    //         if(terminalType !== "" && terminalType !== undefined){
-    //             terminal = vscode.window.createTerminal(terminalName, terminalType);
-    //         } else {
-    //             terminal = vscode.window.createTerminal(terminalName);
-    //         }
-    //     }
-
-	// 	terminal.sendText(command, true);
-	// 	terminal.show();
-	// }
 
     /**
      * Double checks that the Godot extension is running.
@@ -113,6 +69,7 @@ export class GutTools{
         }
         return toReturn;
     }
+
 
     /**
      * Checks the document for the passed in editor and verifies it is a valid
@@ -137,6 +94,7 @@ export class GutTools{
         }
         return toReturn;
     }
+
 
     /**
      * Gets the symbol tree for the opened file.  This tree is created by the
@@ -168,9 +126,9 @@ export class GutTools{
         cmd += ' -s res://addons/gut/gut_cmdln.gd ';
         if(cmd){
             this.gutTerminal.runCommand(`${cmd} ${configOpts} ${options}`);
-            // this.reuseTerminal('GutToolsTest', `${cmd} ${configOpts} ${options}`);
         }
     }
+
 
     private async runGutDebugger(options:string = "") {
         var debuggerSearch : vscode.Uri[] = await vscode.workspace.findFiles("**/addons/gut/gut_vscode_debugger.gd");
@@ -186,6 +144,7 @@ export class GutTools{
         vscode.debug.startDebugging(undefined, config);
     }
 
+
     private async runTests(options:string, useDebugger:boolean){
         if(useDebugger){
             await this.runGutDebugger(options);
@@ -193,6 +152,7 @@ export class GutTools{
             await this.runGut(options);
         }
     }
+
 
     /**
      * Gets the path for the file open in the passed in Editor.
@@ -203,6 +163,7 @@ export class GutTools{
         path = path.replace(/^.*[\\\/]/, '');
         return path;
     }
+
 
     /**
      * Runs the entire test suite.
@@ -215,6 +176,7 @@ export class GutTools{
         this.gutTerminal.refreshTerminal();
         this.runTests("", useDebugger);
     }
+
 
     /**
      * Run the current script
@@ -231,6 +193,7 @@ export class GutTools{
             this.runTests(this.gutTerminal.optionSelectScript(path), useDebugger);
         }
     }
+
 
     /**
      * Runs GUT for the currently focused file, inner class, and test method.
@@ -261,6 +224,7 @@ export class GutTools{
             }
         }
     }
+
 
     /**
      * Shows GUT help in the terminal window.

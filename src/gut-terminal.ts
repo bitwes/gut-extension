@@ -7,11 +7,13 @@ import * as fs from 'fs';
  */
 export class GutTerminal {
     private terminal : vscode.Terminal | undefined = undefined;
-    private name = "gut";
+    private name : string = "gut";
+    private lastShell : string = "";
 
     constructor(name:string){
         this.name = name;
     }
+
 
     private verifyEditorPathSetting(editorPath:string){
         let isValid = false;
@@ -27,16 +29,17 @@ export class GutTerminal {
     public refreshTerminal(){
         this.terminal = vscode.window.terminals.find(t => t.name === this.name);
         let shouldDiscard = utils.getGutExtensionSetting('discardTerminal', true);
+        let currentShell = utils.getGutExtensionSetting("shell", undefined) as string;
 
-        if(shouldDiscard && this.terminal){
+        if(this.terminal && (shouldDiscard || this.lastShell !== currentShell)){
             this.terminal.dispose();
             this.terminal = undefined;
         }
+        this.lastShell = currentShell;
 
-        let terminalType : string = utils.getGutExtensionSetting("terminal", undefined) as string;
 		if (!this.terminal) {
-            if(terminalType !== "" && terminalType !== undefined){
-                this.terminal = vscode.window.createTerminal(this.name, terminalType);
+            if(currentShell !== "" && currentShell !== undefined){
+                this.terminal = vscode.window.createTerminal(this.name, currentShell);
             } else {
                 this.terminal = vscode.window.createTerminal(this.name);
             }

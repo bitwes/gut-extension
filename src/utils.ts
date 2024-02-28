@@ -25,6 +25,7 @@ export function printDocumentSymbols(docSymbols : vscode.DocumentSymbol[], inden
     });
 }
 
+
 /**
  * Get a gut-extension configuration paramter value.  If it does not exist
  * then log and return the default.

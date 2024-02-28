@@ -113,7 +113,17 @@ export class GutTools{
         return await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
             'vscode.executeDocumentSymbolProvider', document.uri) || [];
     }
+ 
 
+    private async isGutInstalled(){
+        let gutFiles = await vscode.workspace.findFiles("**/addons/gut/gut.gd");
+        let yesGutHasBeenFoundHere = true;
+        if(gutFiles.length === 0){
+            yesGutHasBeenFoundHere = false;
+            vscode.window.showErrorMessage("addons/gut/gut.gd not found.  Is GUT installed?");
+        }
+        return yesGutHasBeenFoundHere;
+    }
 
     /**
      * Runs GUT for the current workspace.  Any other eninge options or GUT
@@ -146,6 +156,11 @@ export class GutTools{
 
 
     private async runTests(options:string, useDebugger:boolean){
+        let gutInstalled = await this.isGutInstalled();
+        if(!gutInstalled){
+            return;
+        }
+
         if(useDebugger){
             await this.runGutDebugger(options);
         } else {

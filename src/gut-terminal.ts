@@ -105,14 +105,13 @@ export class GutTerminal {
 
 
     public async getRunGodotCommand() : Promise<string | undefined>{
-        let editorPath : string = await vscode.commands.executeCommand('godotTools.getGodotPath') as string;
-        let toReturn : string | undefined = editorPath;
-
-        if(this.verifyEditorPathSetting(editorPath)){
-            toReturn = this.escapeCommand(toReturn);
-        } else {
-            toReturn = undefined;
+        let editorPath : string = utils.getGutExtensionSetting("godotOverridePath", "");
+        if(editorPath === ""){
+            editorPath = await vscode.commands.executeCommand('godotTools.getGodotPath') as string;    
         }
+        
+        let toReturn : string | undefined = editorPath;
+        toReturn = this.escapeCommand(toReturn);
         return toReturn;
     }
 

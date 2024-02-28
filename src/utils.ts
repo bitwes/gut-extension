@@ -38,11 +38,17 @@ export function getGutExtensionSetting(name:string, defaultValue:any = undefined
     if(value === undefined){
         console.log(`Missing config for:  gut-extension.${name}`);
         value = defaultValue;
+    } else if(typeof(value) === "string"){
+        value = value.trim();
     }
     return value;
 }
 
 
-export function getGodotConfigurationValue(name: string, defaultValue: any = null){
-    return vscode.workspace.getConfiguration("godotTools").get(name, defaultValue)||defaultValue;
+export function getGodotConfigurationValue(name: string, defaultValue:any){
+    let configValue = vscode.workspace.getConfiguration("godotTools").get(name, defaultValue);
+    if(typeof(configValue) === "string"){
+        configValue = configValue.trim();
+    }
+    return configValue || defaultValue;
 }

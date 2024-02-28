@@ -8,7 +8,7 @@ import * as fs from 'fs';
 export class GutTerminal {
     private terminal : vscode.Terminal | undefined = undefined;
     private name : string = "gut";
-    private lastShell : string = "";
+    private lastShell : string | undefined = "";
 
     constructor(name:string){
         this.name = name;
@@ -25,11 +25,18 @@ export class GutTerminal {
         return isValid;
     }
 
+    public getShell(){
+        let theShell = utils.getGutExtensionSetting("shell", undefined) as string;
+        if(theShell === undefined || theShell === ""){
+            theShell = vscode.env.shell;
+        }
+        return theShell;
+    }
 
     public refreshTerminal(){
         this.terminal = vscode.window.terminals.find(t => t.name === this.name);
         let shouldDiscard = utils.getGutExtensionSetting('discardTerminal', true);
-        let currentShell = utils.getGutExtensionSetting("shell", undefined) as string;
+        let currentShell = this.getShell();
 
         if(this.terminal && (shouldDiscard || this.lastShell !== currentShell)){
             this.terminal.dispose();
@@ -69,11 +76,19 @@ export class GutTerminal {
             return false;
         }
 
-        let opts = this.terminal.creationOptions as vscode.TerminalOptions;
-        const shellPath : string | undefined = opts.shellPath;
+        // I'm not supporting powershell on any other OS than windows.  This is
+        // is because that idea disgusts me.  I know, I'm juding you
+        // for using the tools that you like when I don't like those tools. 
+        // The world is unfair.  PRs are welcomed.
+        if(process.platform !== "win32"){
+            return false;
+        }
+        
+        let shellPath : string | undefined = this.getShell();
         let itIs = false;
         if (shellPath && (
-            shellPath.endsWith("powershell.exe") || shellPath.endsWith('pwsh.exe'))){
+            shellPath.toLowerCase().indexOf("powershell") > -1 || 
+            shellPath.toLowerCase().indexOf("pwsh") > -1)){
                 itIs = true;
         }
         return itIs;
@@ -90,14 +105,13 @@ export class GutTerminal {
 
 
     public async getRunGodotCommand() : Promise<string | undefined>{
-        let editorPath : string = await vscode.commands.executeCommand('godotTools.getGodotPath');
-        let toReturn : string | undefined = editorPath;
-
-        if(this.verifyEditorPathSetting(editorPath)){
-            toReturn = this.escapeCommand(toReturn);
-        } else {
-            toReturn = undefined;
+        let editorPath : string = utils.getGutExtensionSetting("godotOverridePath", "");
+        if(editorPath === ""){
+            editorPath = await vscode.commands.executeCommand('godotTools.getGodotPath') as string;    
         }
+        
+        let toReturn : string | undefined = editorPath;
+        toReturn = this.escapeCommand(toReturn);
         return toReturn;
     }
 

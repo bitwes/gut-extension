@@ -120,7 +120,7 @@ export class GutTools{
         let yesGutHasBeenFoundHere = true;
         if(gutFiles.length === 0){
             yesGutHasBeenFoundHere = false;
-            vscode.window.showErrorMessage("addons/gut/gut.gd not found.  Is GUT installed?");
+            vscode.window.showErrorMessage("GUT check failed:  addons/gut/gut.gd not found.  Is GUT installed?");
         }
         return yesGutHasBeenFoundHere;
     }

@@ -9,6 +9,7 @@ export class GutTerminal {
     private terminal : vscode.Terminal | undefined = undefined;
     private name : string = "gut";
     private lastShell : string = "";
+    private defaultShell = vscode.workspace.getConfiguration("terminal.integrated.shell");
 
     constructor(name:string){
         this.name = name;
@@ -67,13 +68,18 @@ export class GutTerminal {
     public isShellPowershell():boolean{
         if(this.terminal === undefined){
             return false;
-        }
-
+        }        
         let opts = this.terminal.creationOptions as vscode.TerminalOptions;
-        const shellPath : string | undefined = opts.shellPath;
+        console.log(this.defaultShell);
+        console.log(opts);
+        let shellPath : string | undefined = opts.shellPath;
+        if(shellPath === undefined){
+            shellPath = this.defaultShell.get("windows");
+        }
         let itIs = false;
         if (shellPath && (
-            shellPath.endsWith("powershell.exe") || shellPath.endsWith('pwsh.exe'))){
+            shellPath.toLowerCase().indexOf("powershell") > -1 || 
+            shellPath.toLowerCase().indexOf("pwsh") > -1)){
                 itIs = true;
         }
         return itIs;
@@ -90,7 +96,7 @@ export class GutTerminal {
 
 
     public async getRunGodotCommand() : Promise<string | undefined>{
-        let editorPath : string = await vscode.commands.executeCommand('godotTools.getGodotPath');
+        let editorPath : string = await vscode.commands.executeCommand('godotTools.getGodotPath') as string;
         let toReturn : string | undefined = editorPath;
 
         if(this.verifyEditorPathSetting(editorPath)){

@@ -8,8 +8,7 @@ import * as fs from 'fs';
 export class GutTerminal {
     private terminal : vscode.Terminal | undefined = undefined;
     private name : string = "gut";
-    private lastShell : string = "";
-    private defaultShell = vscode.workspace.getConfiguration("terminal.integrated.shell");
+    private lastShell : string | undefined = "";
 
     constructor(name:string){
         this.name = name;
@@ -26,11 +25,18 @@ export class GutTerminal {
         return isValid;
     }
 
+    public getShell(){
+        let theShell = utils.getGutExtensionSetting("shell", undefined) as string;
+        if(theShell === undefined || theShell === ""){
+            theShell = vscode.env.shell;
+        }
+        return theShell;
+    }
 
     public refreshTerminal(){
         this.terminal = vscode.window.terminals.find(t => t.name === this.name);
         let shouldDiscard = utils.getGutExtensionSetting('discardTerminal', true);
-        let currentShell = utils.getGutExtensionSetting("shell", undefined) as string;
+        let currentShell = this.getShell();
 
         if(this.terminal && (shouldDiscard || this.lastShell !== currentShell)){
             this.terminal.dispose();
@@ -68,14 +74,17 @@ export class GutTerminal {
     public isShellPowershell():boolean{
         if(this.terminal === undefined){
             return false;
-        }        
-        let opts = this.terminal.creationOptions as vscode.TerminalOptions;
-        console.log(this.defaultShell);
-        console.log(opts);
-        let shellPath : string | undefined = opts.shellPath;
-        if(shellPath === undefined){
-            shellPath = this.defaultShell.get("windows");
         }
+
+        // I'm not supporting powershell on any other OS than windows.  This is
+        // is because that idea disgusts me.  I know, I'm juding you
+        // for using the tools that you like when I don't like those tools. 
+        // The world is unfair.  PRs are welcomed.
+        if(process.platform !== "win32"){
+            return false;
+        }
+        
+        let shellPath : string | undefined = this.getShell();
         let itIs = false;
         if (shellPath && (
             shellPath.toLowerCase().indexOf("powershell") > -1 || 

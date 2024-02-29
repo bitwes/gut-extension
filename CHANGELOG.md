@@ -3,7 +3,10 @@
 All notable changes to the "gut-extension" extension will be documented in this file.
 
 ## 2.2.1
-* Debugger support.  "debugger" versions of all run commands have been added.
+* Debugger support.  "debugger" versions of all run commands have been added.  GUT with breakpoints!
+* Added shell override setting.  Now you can pick how you shell out your GUTs.
+* Added a Godot path override setting.  Now if you shell out your GUTs to something that requires a different path, you can do that.
+* #! cells c shells by the see?  Sure.
 
 ## 2.2.0
 * Changes to work with godot-tools 2.0 extension

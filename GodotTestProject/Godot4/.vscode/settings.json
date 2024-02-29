@@ -1,4 +1,6 @@
 {
     "godot_tools.editor_path": "/Applications/Godot_4.app/Contents/MacOS/Godot",
-    "godot_tools.gdscript_lsp_server_port": 6005
+    "godot_tools.gdscript_lsp_server_port": 6005,
+    "gut-extension.godotOverridePath": "       /mnt/e/butch/development/godot/bin/Godot_v4.2.1-stable_win64.exe       ",
+    "gut-extension.shell": "bash"
 }

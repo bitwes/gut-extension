@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import * as utils from "./utils";
 import {RunAtCursor} from "./run-at-cursor";
+import { GutTerminal } from "./gut-terminal";
 
 
 class GodotDebugConfiguration implements vscode.DebugConfiguration{
@@ -22,92 +23,36 @@ class GodotDebugConfiguration implements vscode.DebugConfiguration{
 
 
 export class GutTools{
-    private cmdUtils = new utils.CommandLineUtils();
-    private optionMaker = new utils.GutOptionMaker();
+    private gutTerminal : GutTerminal = new GutTerminal("GutTests");
 
 	constructor() {}
 
     public activate() {
-        vscode.commands.registerCommand("gut-extension.run_cursor", ()=>{
-            this.runAtCursor();
+        vscode.commands.registerCommand("gut-extension.show_help", ()=>{
+            this.showHelp();
         });
+
         vscode.commands.registerCommand("gut-extension.run_all", ()=>{
             this.runAllTests();
         });
         vscode.commands.registerCommand("gut-extension.run_script", ()=>{
             this.runScript();
         });
-        vscode.commands.registerCommand("gut-extension.show_help", ()=>{
-            this.showHelp();
+        vscode.commands.registerCommand("gut-extension.run_cursor", ()=>{
+            this.runAtCursor();
         });
-
 
         vscode.commands.registerCommand("gut-extension.run_all_debugger", ()=>{
-            this.runAllDebugger();
+            this.runAllTests(true);
         });
         vscode.commands.registerCommand("gut-extension.run_script_debugger", ()=>{
-            this.runScriptDebugger();
+            this.runScript(true);
         });
         vscode.commands.registerCommand("gut-extension.run_cursor_debugger", ()=>{
-            this.runAtCursorDebugger();
+            this.runAtCursor(true);
         });
-
     }
 
-
-    private runAllDebugger(){
-        this.runAllTests(true);
-    }
-
-    private runScriptDebugger(){
-        this.runScript(true);
-    }
-
-    private async runAtCursorDebugger(){
-        this.runAtCursor(true);
-    }
-
-
-    /**
-     * Get a gut-extension configuration paramter value.  If it does not exist
-     * then log and return the default.
-     *
-     * @param name The name of the gut-extension config parameter to get
-     * @param defaultValue The default value to be returned, the default default is undefined
-     */
-    private getGutExtensionSetting(name:string, defaultValue:any = undefined){
-        let value = vscode.workspace.getConfiguration('gut-extension').get(name);
-        if(value === undefined){
-            console.log(`Missing config for:  gut-extension.${name}`);
-            value = defaultValue;
-        }
-        return value;
-    }
-
-    /**
-	 * Runs a command in a terminal with the specified name.  Depending on the
-     * value of the discardTerminal setting this will either dispose of an
-     * existing terminal with that name and create a new or use the existing one.
-     *
-	 * @param terminalName the name of the terminal to create or reuse
-	 * @param command the command to run in the terminal
-	 */
-	private reuseTerminal(terminalName:string, command:string){
-        let terminal = vscode.window.terminals.find(t => t.name === terminalName);
-        let shouldDiscard = this.getGutExtensionSetting('discardTerminal', true);
-
-        if(shouldDiscard && terminal){
-            terminal.dispose();
-            terminal = undefined;
-        }
-
-		if (!terminal) {
-			terminal = vscode.window.createTerminal(terminalName);
-        }
-
-		terminal.sendText(command, true);
-		terminal.show();
-	}
 
     /**
      * Double checks that the Godot extension is running.
@@ -124,6 +69,7 @@ export class GutTools{
         }
         return toReturn;
     }
+
 
     /**
      * Checks the document for the passed in editor and verifies it is a valid
@@ -149,6 +95,7 @@ export class GutTools{
         return toReturn;
     }
 
+
     /**
      * Gets the symbol tree for the opened file.  This tree is created by the
      * Godot Tools Extension for .gd files.
@@ -166,7 +113,17 @@ export class GutTools{
         return await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
             'vscode.executeDocumentSymbolProvider', document.uri) || [];
     }
+ 
 
+    private async isGutInstalled(){
+        let gutFiles = await vscode.workspace.findFiles("**/addons/gut/gut.gd");
+        let yesGutHasBeenFoundHere = true;
+        if(gutFiles.length === 0){
+            yesGutHasBeenFoundHere = false;
+            vscode.window.showErrorMessage("GUT check failed:  addons/gut/gut.gd not found.  Is GUT installed?");
+        }
+        return yesGutHasBeenFoundHere;
+    }
 
     /**
      * Runs GUT for the current workspace.  Any other eninge options or GUT
@@ -174,15 +131,16 @@ export class GutTools{
      * @param options other GUT or Godot options
      */
     private async runGut(options:string = ''){
-        let cmd = await this.cmdUtils.getRunGodotCommand();
-        let configOpts = this.getGutExtensionSetting('additionalOptions', '');
+        let cmd = await this.gutTerminal.getRunGodotCommand();
+        let configOpts = utils.getGutExtensionSetting('additionalOptions', '');
         cmd += ' -s res://addons/gut/gut_cmdln.gd ';
         if(cmd){
-            this.reuseTerminal('GutToolsTest', `${cmd} ${configOpts} ${options}`);
+            this.gutTerminal.runCommand(`${cmd} ${configOpts} ${options}`);
         }
     }
 
-    private async runGutDebugger(options:string = ""){
+
+    private async runGutDebugger(options:string = "") {
         var debuggerSearch : vscode.Uri[] = await vscode.workspace.findFiles("**/addons/gut/gut_vscode_debugger.gd");
         var gutScript = "gut_cmdln.gd";
         if(debuggerSearch.length === 1){
@@ -196,13 +154,20 @@ export class GutTools{
         vscode.debug.startDebugging(undefined, config);
     }
 
+
     private async runTests(options:string, useDebugger:boolean){
+        let gutInstalled = await this.isGutInstalled();
+        if(!gutInstalled){
+            return;
+        }
+
         if(useDebugger){
             await this.runGutDebugger(options);
         } else {
             await this.runGut(options);
         }
     }
+
 
     /**
      * Gets the path for the file open in the passed in Editor.
@@ -214,6 +179,7 @@ export class GutTools{
         return path;
     }
 
+
     /**
      * Runs the entire test suite.
      */
@@ -221,8 +187,11 @@ export class GutTools{
         if(!this.isGodotExtensionRunning()){
             return;
         }
+
+        this.gutTerminal.refreshTerminal();
         this.runTests("", useDebugger);
     }
+
 
     /**
      * Run the current script
@@ -232,12 +201,14 @@ export class GutTools{
             return;
         }
 
+        this.gutTerminal.refreshTerminal();
         const activeEditor = vscode.window.activeTextEditor;
         if(this.isActiveEditorFileValid(activeEditor)){
             let path = this.getFilePath(activeEditor);
-            this.runTests(this.optionMaker.optionSelectScript(path), useDebugger);
+            this.runTests(this.gutTerminal.optionSelectScript(path), useDebugger);
         }
     }
+
 
     /**
      * Runs GUT for the currently focused file, inner class, and test method.
@@ -247,6 +218,7 @@ export class GutTools{
             return;
         }
 
+        this.gutTerminal.refreshTerminal();
         let activeEditor = vscode.window.activeTextEditor;
         // Have to "&& activeEditor" or vscode thinks it hasn't been checked for
         // undefined.  Must check it 2nd or we don't get all the error messages
@@ -258,7 +230,7 @@ export class GutTools{
             let info = await this.getSymbols(doc);
             if(info.length > 0){
                 let rac = new RunAtCursor();
-                let opts = rac.getOptionsForLine(info, line);
+                let opts = rac.getOptionsForLine(this.gutTerminal, info, line);
                 this.runTests(opts, useDebugger);
             } else {
                 vscode.window.showErrorMessage(
@@ -268,11 +240,13 @@ export class GutTools{
         }
     }
 
+
     /**
      * Shows GUT help in the terminal window.
      */
     private showHelp(){
-        this.runGut('-gh --no-window');
+        this.gutTerminal.refreshTerminal();
+        this.runGut('-gh');
     }
 
 }

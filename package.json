@@ -13,7 +13,7 @@
 		"Other"
 	],
 	"activationEvents": [
-		"workspaceContains:**/addons/gut/gut.gd"
+		"onLanguage:gdscript"
 	],
 	"main": "./out/extension.js",
 	"contributes": {

@@ -65,12 +65,11 @@
 					"default": "",
 					"description": "The shell to use when running GUT.  Leave blank to use the default shell.  Does not affect running through debugger."
 				},
-				"gut-extension.godotOverridePath":{
+				"gut-extension.godotOverridePath": {
 					"type": "string",
 					"default": "",
 					"description": "GUT uses the godot-tools extension to get the path to the appropriate Godot executable when running tests.  When this is set, it will be used instead of the godot3 or godot4 path configured in godot-tools.  This is useful if you are windows and want to use a Unix shell.\n\nIt is recommended you set this per workspace if you work in Godot 3 and Godot 4 projects since it will be used regardless of project version."
 				}
-				
 			}
 		}
 	},
@@ -80,7 +79,7 @@
 		"lint": "eslint src --ext ts",
 		"watch": "tsc -watch -p ./",
 		"pretest": "npm run compile && npm run lint",
-		"test": "node ./out/test/runTest.js"
+		"test": "vscode-test"
 	},
 	"devDependencies": {
 		"@types/glob": "^7.1.1",
@@ -89,6 +88,8 @@
 		"@types/vscode": "^1.76.0",
 		"@typescript-eslint/eslint-plugin": "^2.18.0",
 		"@typescript-eslint/parser": "^2.18.0",
+		"@vscode/test-cli": "^0.0.6",
+		"@vscode/test-electron": "^2.3.9",
 		"eslint": "^6.8.0",
 		"glob": "^7.1.6",
 		"mocha": "^10.2.0",

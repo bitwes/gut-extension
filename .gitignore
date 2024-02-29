@@ -8,3 +8,5 @@ GodotTestProject/Godot3/.import/
 GodotTestProject/Godot4/addons/
 GodotTestProject/Godot4/.import/
 GodotTestProject/Godot4/.godot/
+
+.vscode-test/*

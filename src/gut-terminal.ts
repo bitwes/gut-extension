@@ -15,16 +15,6 @@ export class GutTerminal {
     }
 
 
-    private verifyEditorPathSetting(editorPath:string){
-        let isValid = false;
-        if (!fs.existsSync(editorPath) || !fs.statSync(editorPath).isFile()) {
-            vscode.window.showErrorMessage(`Could not find Godot at:  [${editorPath}].  Please verify that the godot-tools extension is configured.`);
-        } else {
-            isValid = true;
-        }
-        return isValid;
-    }
-
     public getShell(){
         let theShell = utils.getGutExtensionSetting("shell", undefined) as string;
         if(theShell === undefined || theShell === ""){
@@ -76,18 +66,10 @@ export class GutTerminal {
             return false;
         }
 
-        // I'm not supporting powershell on any other OS than windows.  This is
-        // is because that idea disgusts me.  I know, I'm juding you
-        // for using the tools that you like when I don't like those tools. 
-        // The world is unfair.  PRs are welcomed.
-        if(process.platform !== "win32"){
-            return false;
-        }
-        
         let shellPath : string | undefined = this.getShell();
         let itIs = false;
         if (shellPath && (
-            shellPath.toLowerCase().indexOf("powershell") > -1 || 
+            shellPath.toLowerCase().indexOf("powershell") > -1 ||
             shellPath.toLowerCase().indexOf("pwsh") > -1)){
                 itIs = true;
         }
@@ -107,9 +89,9 @@ export class GutTerminal {
     public async getRunGodotCommand() : Promise<string | undefined>{
         let editorPath : string = utils.getGutExtensionSetting("godotOverridePath", "");
         if(editorPath === ""){
-            editorPath = await vscode.commands.executeCommand('godotTools.getGodotPath') as string;    
+            editorPath = await vscode.commands.executeCommand('godotTools.getGodotPath') as string;
         }
-        
+
         let toReturn : string | undefined = editorPath;
         toReturn = this.escapeCommand(toReturn);
         return toReturn;

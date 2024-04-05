@@ -2,12 +2,12 @@
 	"name": "gut-extension",
 	"displayName": "gut-extension",
 	"description": "Run GUT(Godot Unit Test) tests from VSCode.",
-	"version": "2.2.1",
+	"version": "2.2.2",
 	"icon": "images/icon.png",
 	"repository": "https://github.com/bitwes/gut-extension",
 	"publisher": "bitwes",
 	"engines": {
-		"vscode": "^1.76.0"
+		"vscode": "^1.88.0"
 	},
 	"categories": [
 		"Other"
@@ -85,7 +85,7 @@
 		"@types/glob": "^7.1.1",
 		"@types/mocha": "^7.0.1",
 		"@types/node": "^12.11.7",
-		"@types/vscode": "^1.76.0",
+		"@types/vscode": "^1.88.0",
 		"@typescript-eslint/eslint-plugin": "^2.18.0",
 		"@typescript-eslint/parser": "^2.18.0",
 		"@vscode/test-cli": "^0.0.6",

@@ -19,6 +19,11 @@ class GodotDebugConfiguration implements vscode.DebugConfiguration{
         this.port = utils.getGodotConfigurationValue("lsp.serverPort", this.port);
         this.address = utils.getGodotConfigurationValue("lsp.serverHost", this.address);
     }
+
+    public constructor(config: vscode.DebugConfiguration) {
+        this.port = config?.port || this.port;
+        this.address = config?.address || this.address;
+    }
 }
 
 
@@ -140,18 +145,40 @@ export class GutTools{
     }
 
 
-    private async runGutDebugger(options:string = "") {
-        var debuggerSearch : vscode.Uri[] = await vscode.workspace.findFiles("**/addons/gut/gut_vscode_debugger.gd");
+    private async runGutDebugger(options: string = "") {
+        var debuggerSearch: vscode.Uri[] = await vscode.workspace.findFiles("**/addons/gut/gut_vscode_debugger.gd");
         var gutScript = "gut_cmdln.gd";
-        if(debuggerSearch.length === 1){
+        if (debuggerSearch.length === 1) {
             gutScript = "gut_vscode_debugger.gd";
         }
-
-        let config = new GodotDebugConfiguration();
-        config.useGodotExtensionSettings();
-        config.additional_options = ` -s \"res://addons/gut/${gutScript}\" `;
-        config.additional_options += options;
-        vscode.debug.startDebugging(undefined, config);
+    
+        // Check if workspaceFolders is defined
+        if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+            // Load the project's launch.json configuration
+            const launchConfig = vscode.workspace.getConfiguration("launch", vscode.workspace.workspaceFolders[0].uri);
+            const debugConfigurations = launchConfig.get<vscode.DebugConfiguration[]>("configurations");
+    
+            if (debugConfigurations) {
+                // Find the debug configuration for Godot
+                const godotDebugConfig = debugConfigurations.find((config: vscode.DebugConfiguration) => config.type === "godot");
+    
+                if (godotDebugConfig) {
+                    // Modify the debug configuration to include the GUT script and additional options
+                    let config = new GodotDebugConfiguration(godotDebugConfig);
+                    config.additional_options = ` -s \"res://addons/gut/${gutScript}\" `;
+                    config.additional_options += options;
+    
+                    // Start debugging with the modified configuration
+                    vscode.debug.startDebugging(undefined, config);
+                } else {
+                    vscode.window.showErrorMessage("No Godot debug configuration found in launch.json");
+                }
+            } else {
+                vscode.window.showErrorMessage("No debug configurations found in launch.json");
+            }
+        } else {
+            vscode.window.showErrorMessage("No workspace folders are open.");
+        }
     }
 
 

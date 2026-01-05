@@ -27,7 +27,7 @@ This extension requires the Godot Tools extension and requires that the path set
 This tool uses the GUT command line interface to run tests (even when going through the debugger).  It requires you create a `res://.gutconfig.json` file or add settings in `gut-extension.AdditionalOptions` in order to find your tests.  More information can be found in the [GUT Command Line wiki page](https://github.com/bitwes/Gut/wiki/Command-Line).
 
 ### Sample .gutconfig.json
-Any option that the GUT command line tool accepts can be configured in the `gutconfig.json` file.  These are the most commonly used.
+Any option that the GUT command line tool accepts can be configured in the `.gutconfig.json` file.  These are the most commonly used.
 ```
 {
     "dirs":[
